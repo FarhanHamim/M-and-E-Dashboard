@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="space-y-6">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+                <p class="text-undp-text-light mt-2">
+                    {% if indicator %}
+                        Update indicator information
+                    {% else %}
+                        Create a new indicator
+                    {% endif %}
+                </p>
+            </div>
+            
+            <a href="{% url 'dashboard:indicator_list' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Indicators
+            </a>
+        </div>
+
+        <!-- Indicator Form -->
+        <div class="card">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Basic Information
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Indicator Name *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Indicator Code *</label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.code.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-undp-text-light mt-1">
+                                Short unique code for this indicator
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Indicator Configuration -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Configuration
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Indicator Type *</label>
+                            {{ form.indicator_type }}
+                            {% if form.indicator_type.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.indicator_type.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-undp-text-light mt-1">
+                                Choose the type that best describes this indicator
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Measurement Unit *</label>
+                            {{ form.measurement_unit }}
+                            {% if form.measurement_unit.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.measurement_unit.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Target Value *</label>
+                            {{ form.target_value }}
+                            {% if form.target_value.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.target_value.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-undp-text-light mt-1">
+                                Expected target value for this indicator
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Reporting Frequency *</label>
+                            {{ form.frequency }}
+                            {% if form.frequency.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.frequency.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Assignment -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Project Assignment
+                    </h3>
+                    
+                    <div>
+                        <label class="form-label">Associated Projects</label>
+                        {{ form.projects }}
+                        {% if form.projects.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.projects.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-undp-text-light mt-1">
+                            Select projects that will use this indicator
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Responsible User</label>
+                        {{ form.responsible_user }}
+                        {% if form.responsible_user.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.responsible_user.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-undp-text-light mt-1">
+                            User responsible for this indicator (optional)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Status
+                    </h3>
+                    
+                    <div class="flex items-center">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" class="ml-2 text-sm text-undp-text">
+                            Active indicator
+                        </label>
+                    </div>
+                    <div class="text-xs text-undp-text-light">
+                        Active indicators can be used for data entry and reporting.
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-undp-gray-dark">
+                    <a href="{% url 'dashboard:indicator_list' %}" class="btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        {% if indicator %}Update Indicator{% else %}Create Indicator{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card bg-blue-50 border-blue-200">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-600 text-xl mr-3 mt-1"></i>
+                <div>
+                    <h4 class="font-semibold text-blue-800 mb-2">Indicator Setup Guidelines</h4>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• <strong>Output:</strong> Direct deliverables or services produced</li>
+                        <li>• <strong>Outcome:</strong> Changes in behavior, knowledge, or conditions</li>
+                        <li>• <strong>Impact:</strong> Long-term effects and changes</li>
+                        <li>• <strong>Process:</strong> Activities and processes undertaken</li>
+                        <li>• Use clear, measurable indicators with specific targets</li>
+                        <li>• Assign indicators to relevant projects</li>
+                        <li>• Set appropriate reporting frequencies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Associated Data (if editing) -->
+        {% if indicator and indicator.values.exists %}
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Submitted Data</h3>
+                
+                <div class="text-sm text-undp-text-light mb-4">
+                    This indicator has {{ indicator.values.count }} data submissions.
+                    <a href="{% url 'dashboard:indicator_detail' indicator.id %}" class="text-undp-blue hover:text-undp-blue-dark ml-2">
+                        View all submissions
+                    </a>
+                </div>
+                
+                <div class="space-y-3">
+                    {% for value in indicator.values.all|slice:":5" %}
+                        <div class="flex items-center justify-between p-3 bg-undp-gray rounded-lg">
+                            <div>
+                                <div class="font-medium text-undp-text">{{ value.project.name }}</div>
+                                <div class="text-sm text-undp-text-light">
+                                    {{ value.reported_value }} reported on {{ value.created_at|date:"M d, Y" }}
+                                </div>
+                            </div>
+                            <div>
+                                {% if value.achievement_rate %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                        {% if value.achievement_rate >= 100 %}bg-green-100 text-green-800
+                                        {% elif value.achievement_rate >= 80 %}bg-yellow-100 text-yellow-800
+                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ value.achievement_rate|floatformat:1 }}%
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate code from name
+    const nameField = document.querySelector('input[name="name"]');
+    const codeField = document.querySelector('input[name="code"]');
+    
+    if (nameField && codeField && !codeField.value) {
+        nameField.addEventListener('input', function() {
+            if (!codeField.value) {
+                const code = this.value
+                    .toUpperCase()
+                    .replace(/[^A-Z\s]/g, '')
+                    .split(' ')
+                    .map(word => word.substring(0, 3))
+                    .join('')
+                    .substring(0, 8);
+                codeField.value = code;
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const name = document.querySelector('input[name="name"]').value.trim();
+        const code = document.querySelector('input[name="code"]').value.trim();
+        const targetValue = document.querySelector('input[name="target_value"]').value.trim();
+        
+        if (!name || !code || !targetValue) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+            return false;
+        }
+        
+        if (code.length < 3) {
+            e.preventDefault();
+            alert('Indicator code must be at least 3 characters long.');
+            return false;
+        }
+        
+        const target = parseFloat(targetValue);
+        if (isNaN(target) || target <= 0) {
+            e.preventDefault();
+            alert('Target value must be a positive number.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

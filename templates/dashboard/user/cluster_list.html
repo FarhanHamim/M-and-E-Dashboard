@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="card bg-gradient-to-r from-undp-blue to-undp-blue-light text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="text-sm opacity-80">Project User</div>
+                <h1 class="text-3xl font-bold">{{ title }}</h1>
+                <p class="opacity-90 mt-1">Manage clusters for your projects</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'dashboard:user_cluster_create' %}" class="btn-secondary bg-white text-undp-blue border-0">
+                    <i class="fas fa-plus mr-2"></i>Create Cluster
+                </a>
+                <a href="{% url 'dashboard:dashboard_home' %}" class="btn-secondary bg-white text-undp-blue border-0">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card">
+        <form method="get" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search clusters..." class="form-input w-full">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-search mr-2"></i>Search
+                </button>
+                <a href="{% url 'dashboard:user_cluster_list' %}" class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Clusters Table -->
+    <div class="card">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-undp-text">Clusters</h3>
+            <div class="text-sm text-undp-text-light">
+                Showing {{ clusters.start_index }}-{{ clusters.end_index }} of {{ clusters.paginator.count }} clusters
+            </div>
+        </div>
+
+        {% if clusters %}
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cluster in clusters %}
+                            <tr>
+                                <td>
+                                    <div class="font-medium text-undp-text">{{ cluster.name }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text-light">{{ cluster.code }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">{{ cluster.description|truncatechars:50 }}</div>
+                                </td>
+                                <td>
+                                    <span class="status-{% if cluster.is_active %}active{% else %}inactive{% endif %}">
+                                        {% if cluster.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">{{ cluster.created_at|date:"M d, Y" }}</div>
+                                </td>
+                                <td>
+                                    <div class="flex space-x-2">
+                                        <a href="{% url 'dashboard:user_cluster_edit' cluster.id %}" class="btn-sm btn-secondary">
+                                            <i class="fas fa-edit mr-1"></i>Edit
+                                        </a>
+                                        <a href="{% url 'dashboard:user_cluster_delete' cluster.id %}" class="btn-sm btn-danger">
+                                            <i class="fas fa-trash mr-1"></i>Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if clusters.has_other_pages %}
+                <div class="flex items-center justify-between mt-6">
+                    <div class="text-sm text-undp-text-light">
+                        Page {{ clusters.number }} of {{ clusters.paginator.num_pages }}
+                    </div>
+                    <div class="flex space-x-2">
+                        {% if clusters.has_previous %}
+                            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="btn-sm btn-secondary">First</a>
+                            <a href="?page={{ clusters.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn-sm btn-secondary">Previous</a>
+                        {% endif %}
+                        
+                        {% if clusters.has_next %}
+                            <a href="?page={{ clusters.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn-sm btn-secondary">Next</a>
+                            <a href="?page={{ clusters.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn-sm btn-secondary">Last</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-8 text-undp-text-light">
+                <i class="fas fa-sitemap text-4xl mb-4"></i>
+                <p>No clusters found.</p>
+                {% if search_query %}
+                    <p class="text-sm mt-2">Try adjusting your search terms.</p>
+                {% else %}
+                    <a href="{% url 'dashboard:user_cluster_create' %}" class="btn-primary mt-4">
+                        <i class="fas fa-plus mr-2"></i>Create First Cluster
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

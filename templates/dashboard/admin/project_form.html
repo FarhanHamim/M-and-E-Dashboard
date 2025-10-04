@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="space-y-6">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+                <p class="text-undp-text-light mt-2">
+                    {% if project %}
+                        Update project information
+                    {% else %}
+                        Create a new project
+                    {% endif %}
+                </p>
+            </div>
+            
+            <a href="{% url 'dashboard:project_list' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Projects
+            </a>
+        </div>
+
+        <!-- Project Form -->
+        <div class="card">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Basic Information
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Project Name *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Project Code *</label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.code.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-undp-text-light mt-1">
+                                Short unique code for this project
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Cluster *</label>
+                            {{ form.cluster }}
+                            {% if form.cluster.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.cluster.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dates and Budget -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Timeline & Budget
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Start Date *</label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.start_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">End Date *</label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.end_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Budget</label>
+                        {{ form.budget }}
+                        {% if form.budget.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.budget.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-undp-text-light mt-1">
+                            Enter budget in USD (optional)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Assignment -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Team Assignment
+                    </h3>
+                    
+                    <div>
+                        <label class="form-label">Assigned Users</label>
+                        {{ form.assigned_users }}
+                        {% if form.assigned_users.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.assigned_users.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-undp-text-light mt-1">
+                            Select users who will be responsible for data entry and project management
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Project Status
+                    </h3>
+                    
+                    <div class="flex items-center">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" class="ml-2 text-sm text-undp-text">
+                            Active project
+                        </label>
+                    </div>
+                    <div class="text-xs text-undp-text-light">
+                        Active projects are visible to assigned users and can receive data submissions.
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-undp-gray-dark">
+                    <a href="{% url 'dashboard:project_list' %}" class="btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        {% if project %}Update Project{% else %}Create Project{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card bg-blue-50 border-blue-200">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-600 text-xl mr-3 mt-1"></i>
+                <div>
+                    <h4 class="font-semibold text-blue-800 mb-2">Project Setup Guidelines</h4>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• Choose a descriptive name that clearly identifies the project</li>
+                        <li>• Use a consistent coding system for project codes</li>
+                        <li>• Assign users who will be responsible for data entry</li>
+                        <li>• Set realistic start and end dates</li>
+                        <li>• Include budget information if available</li>
+                        <li>• Select the appropriate thematic cluster</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Associated Indicators (if editing) -->
+        {% if project and project.indicators.exists %}
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Associated Indicators</h3>
+                
+                <div class="space-y-3">
+                    {% for indicator in project.indicators.all %}
+                        <div class="flex items-center justify-between p-3 bg-undp-gray rounded-lg">
+                            <div>
+                                <div class="font-medium text-undp-text">{{ indicator.name }}</div>
+                                <div class="text-sm text-undp-text-light">{{ indicator.code }} • {{ indicator.get_indicator_type_display }}</div>
+                            </div>
+                            <div>
+                                <a href="{% url 'dashboard:indicator_detail' indicator.id %}" 
+                                   class="text-sm text-undp-blue hover:text-undp-blue-dark">
+                                    View Indicator
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate code from name
+    const nameField = document.querySelector('input[name="name"]');
+    const codeField = document.querySelector('input[name="code"]');
+    
+    if (nameField && codeField && !codeField.value) {
+        nameField.addEventListener('input', function() {
+            if (!codeField.value) {
+                const code = this.value
+                    .toUpperCase()
+                    .replace(/[^A-Z\s]/g, '')
+                    .split(' ')
+                    .map(word => word.substring(0, 3))
+                    .join('')
+                    .substring(0, 6);
+                codeField.value = code;
+            }
+        });
+    }
+    
+    // Date validation
+    const startDateField = document.querySelector('input[name="start_date"]');
+    const endDateField = document.querySelector('input[name="end_date"]');
+    
+    function validateDates() {
+        if (startDateField.value && endDateField.value) {
+            const startDate = new Date(startDateField.value);
+            const endDate = new Date(endDateField.value);
+            
+            if (startDate >= endDate) {
+                endDateField.setCustomValidity('End date must be after start date');
+                endDateField.reportValidity();
+            } else {
+                endDateField.setCustomValidity('');
+            }
+        }
+    }
+    
+    if (startDateField && endDateField) {
+        startDateField.addEventListener('change', validateDates);
+        endDateField.addEventListener('change', validateDates);
+    }
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const name = document.querySelector('input[name="name"]').value.trim();
+        const code = document.querySelector('input[name="code"]').value.trim();
+        const startDate = document.querySelector('input[name="start_date"]').value;
+        const endDate = document.querySelector('input[name="end_date"]').value;
+        
+        if (!name || !code || !startDate || !endDate) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+            return false;
+        }
+        
+        if (code.length < 3) {
+            e.preventDefault();
+            alert('Project code must be at least 3 characters long.');
+            return false;
+        }
+        
+        validateDates();
+        if (!endDateField.checkValidity()) {
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

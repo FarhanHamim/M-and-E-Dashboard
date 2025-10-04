@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+            <p class="text-undp-text-light mt-2">Submit indicator data for {{ project.name }}</p>
+        </div>
+        
+        <div class="flex space-x-4">
+            <a href="{% url 'dashboard:data_entry_home' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Data Entry
+            </a>
+            <a href="{% url 'dashboard:project_detail' project.id %}" class="btn-secondary">
+                <i class="fas fa-eye mr-2"></i>View Project
+            </a>
+        </div>
+    </div>
+
+    <!-- Project Information -->
+    <div class="card">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <h3 class="font-semibold text-undp-text mb-2">Project Details</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Cluster:</span>
+                        <span class="text-undp-text">{{ project.cluster.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Status:</span>
+                        <span class="status-{{ project.status }}">{{ project.get_status_display }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Period:</span>
+                        <span class="text-undp-text">{{ project.start_date|date:"M Y" }} - {{ project.end_date|date:"M Y" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="font-semibold text-undp-text mb-2">Indicators</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Total Indicators:</span>
+                        <span class="text-undp-text font-semibold">{{ indicators.count }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Output:</span>
+                        <span class="text-undp-text">{{ indicators|length|add:"-1" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Outcome:</span>
+                        <span class="text-undp-text">1</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="font-semibold text-undp-text mb-2">Submission Info</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Reporting User:</span>
+                        <span class="text-undp-text">{{ request.user.get_full_name|default:request.user.username }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Submission Date:</span>
+                        <span class="text-undp-text">{{ "now"|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Status:</span>
+                        <span class="text-success">Ready to Submit</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Entry Form -->
+    <form method="post" action="{% url 'dashboard:submit_data' %}" id="data-entry-form" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Hidden field for project -->
+        <input type="hidden" name="project_id" value="{{ project.id }}">
+        
+        <!-- Indicators Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold text-undp-text">Indicator Data</h3>
+                <p class="text-undp-text-light">Enter values for each indicator in this project</p>
+            </div>
+            
+            <div class="space-y-8" id="indicators-container">
+                {% for indicator in indicators %}
+                    <div class="border border-undp-gray-dark rounded-lg p-6 indicator-section" data-indicator-id="{{ indicator.id }}">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-undp-text mb-2">{{ indicator.name }}</h4>
+                                <p class="text-sm text-undp-text-light mb-3">{{ indicator.description|default:"No description available" }}</p>
+                                
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <div class="flex items-center">
+                                        <span class="text-undp-text-light mr-2">Code:</span>
+                                        <span class="font-mono text-undp-text">{{ indicator.code }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="text-undp-text-light mr-2">Type:</span>
+                                        <span class="text-undp-text">{{ indicator.get_indicator_type_display }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="text-undp-text-light mr-2">Unit:</span>
+                                        <span class="text-undp-text">{{ indicator.get_measurement_unit_display }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="text-undp-text-light mr-2">Frequency:</span>
+                                        <span class="text-undp-text">{{ indicator.get_frequency_display }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-right">
+                                <div class="text-sm text-undp-text-light mb-1">Target Value</div>
+                                <div class="text-lg font-semibold text-undp-blue">{{ indicator.target_value }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="form-label">Reported Value *</label>
+                                <input 
+                                    type="number" 
+                                    name="indicator_{{ indicator.id }}_reported_value"
+                                    class="form-input" 
+                                    step="0.01"
+                                    placeholder="Enter reported value"
+                                    required
+                                    data-indicator-id="{{ indicator.id }}"
+                                    data-target-value="{{ indicator.target_value }}"
+                                >
+                                <div class="text-xs text-undp-text-light mt-1">
+                                    Enter the actual value achieved for this indicator
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Target Value</label>
+                                <input 
+                                    type="number" 
+                                    name="indicator_{{ indicator.id }}_target_value"
+                                    class="form-input" 
+                                    step="0.01"
+                                    value="{{ indicator.target_value }}"
+                                    readonly
+                                    data-indicator-id="{{ indicator.id }}"
+                                >
+                                <div class="text-xs text-undp-text-light mt-1">
+                                    Target value for this indicator (read-only)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div>
+                                <label class="form-label">Reporting Period Start *</label>
+                                <input 
+                                    type="date" 
+                                    name="indicator_{{ indicator.id }}_period_start"
+                                    class="form-input" 
+                                    required
+                                    data-indicator-id="{{ indicator.id }}"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Reporting Period End *</label>
+                                <input 
+                                    type="date" 
+                                    name="indicator_{{ indicator.id }}_period_end"
+                                    class="form-input" 
+                                    required
+                                    data-indicator-id="{{ indicator.id }}"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label class="form-label">Notes</label>
+                            <textarea 
+                                name="indicator_{{ indicator.id }}_notes"
+                                class="form-textarea" 
+                                rows="3"
+                                placeholder="Add any additional notes or comments about this indicator..."
+                                data-indicator-id="{{ indicator.id }}"
+                            ></textarea>
+                        </div>
+                        
+                        <!-- Achievement Rate Display -->
+                        <div class="mt-4 p-4 bg-undp-gray rounded-lg achievement-display" style="display: none;">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-sm text-undp-text-light">Achievement Rate</div>
+                                    <div class="text-2xl font-bold achievement-rate">0%</div>
+                                </div>
+                                <div class="achievement-status">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                                        Status
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-chart-bar text-6xl text-undp-text-light mb-4"></i>
+                        <h3 class="text-xl font-semibold text-undp-text mb-2">No Indicators Found</h3>
+                        <p class="text-undp-text-light mb-6">
+                            This project doesn't have any indicators assigned yet. Please contact an administrator.
+                        </p>
+                        <a href="{% url 'dashboard:data_entry_home' %}" class="btn-primary">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Data Entry
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        {% if indicators %}
+            <div class="flex justify-between items-center pt-6 border-t border-undp-gray-dark">
+                <div class="text-sm text-undp-text-light">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    All fields marked with * are required
+                </div>
+                
+                <div class="flex space-x-4">
+                    <a href="{% url 'dashboard:data_entry_home' %}" class="btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary" id="submit-btn">
+                        <i class="fas fa-save mr-2"></i>Submit Data
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </form>
+
+    <!-- Help Section -->
+    <div class="card bg-blue-50 border-blue-200">
+        <div class="flex items-start">
+            <i class="fas fa-lightbulb text-blue-600 text-xl mr-3 mt-1"></i>
+            <div>
+                <h4 class="font-semibold text-blue-800 mb-2">Data Submission Guidelines</h4>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Enter accurate values based on your actual project results</li>
+                    <li>• Use the reporting period that corresponds to your data collection timeframe</li>
+                    <li>• Add notes to explain any unusual values or circumstances</li>
+                    <li>• Achievement rate is calculated automatically based on reported vs target values</li>
+                    <li>• You can save and return to complete the form later if needed</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('data-entry-form');
+    const indicators = document.querySelectorAll('.indicator-section');
+    
+    // Initialize form validation and achievement calculation
+    indicators.forEach(indicatorSection => {
+        const reportedValueInput = indicatorSection.querySelector('input[name*="_reported_value"]');
+        const targetValueInput = indicatorSection.querySelector('input[name*="_target_value"]');
+        const achievementDisplay = indicatorSection.querySelector('.achievement-display');
+        const achievementRate = indicatorSection.querySelector('.achievement-rate');
+        const achievementStatus = indicatorSection.querySelector('.achievement-status span');
+        
+        if (reportedValueInput && targetValueInput) {
+            // Calculate achievement rate when values change
+            function calculateAchievement() {
+                const reported = parseFloat(reportedValueInput.value);
+                const target = parseFloat(targetValueInput.value);
+                
+                if (reported && target && target > 0) {
+                    const rate = (reported / target) * 100;
+                    achievementRate.textContent = rate.toFixed(1) + '%';
+                    
+                    // Update status
+                    let statusClass, statusText;
+                    if (rate >= 100) {
+                        statusClass = 'bg-green-100 text-green-800';
+                        statusText = 'Target Achieved';
+                    } else if (rate >= 80) {
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                        statusText = 'On Track';
+                    } else {
+                        statusClass = 'bg-red-100 text-red-800';
+                        statusText = 'Below Target';
+                    }
+                    
+                    achievementStatus.className = `inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusClass}`;
+                    achievementStatus.textContent = statusText;
+                    
+                    achievementDisplay.style.display = 'block';
+                } else {
+                    achievementDisplay.style.display = 'none';
+                }
+            }
+            
+            reportedValueInput.addEventListener('input', calculateAchievement);
+            targetValueInput.addEventListener('input', calculateAchievement);
+        }
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('input[required], select[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                field.classList.remove('border-red-500');
+            }
+        });
+        
+        // Validate date ranges
+        const datePairs = form.querySelectorAll('input[type="date"]');
+        for (let i = 0; i < datePairs.length; i += 2) {
+            const startDate = datePairs[i];
+            const endDate = datePairs[i + 1];
+            
+            if (startDate.value && endDate.value) {
+                if (new Date(startDate.value) > new Date(endDate.value)) {
+                    startDate.classList.add('border-red-500');
+                    endDate.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    startDate.classList.remove('border-red-500');
+                    endDate.classList.remove('border-red-500');
+                }
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields and ensure date ranges are valid.');
+        } else {
+            // Show loading state
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+        }
+    });
+    
+    // Auto-fill current date for period end if not set
+    const periodEndInputs = document.querySelectorAll('input[name*="_period_end"]');
+    periodEndInputs.forEach(input => {
+        if (!input.value) {
+            const today = new Date().toISOString().split('T')[0];
+            input.value = today;
+        }
+    });
+});
+</script>
+{% endblock %}

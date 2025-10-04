@@ -1,0 +1,16 @@
+{% for v in values %}
+<tr>
+    <td class="px-4 py-2 whitespace-nowrap">{{ v.project.name }}</td>
+    <td class="px-4 py-2 whitespace-nowrap">{{ v.indicator.name }}</td>
+    <td class="px-4 py-2 whitespace-nowrap">{{ v.reported_value }}</td>
+    <td class="px-4 py-2 whitespace-nowrap">{% if v.target_value is not None %}{{ v.target_value }}{% endif %}</td>
+    <td class="px-4 py-2 whitespace-nowrap">{{ v.reporting_period_start }} - {{ v.reporting_period_end }}</td>
+    <td class="px-4 py-2 whitespace-nowrap">{{ v.reported_by.get_full_name|default:v.reported_by.username }}</td>
+    <td class="px-4 py-2 whitespace-nowrap">{{ v.created_at|date:'Y-m-d H:i' }}</td>
+{% empty %}
+<tr>
+    <td colspan="7" class="px-4 py-6 text-center text-gray-500">No records found.</td>
+</tr>
+{% endfor %}
+
+

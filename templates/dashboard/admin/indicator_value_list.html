@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+            <p class="text-undp-text-light mt-2">Manage all indicator value submissions</p>
+        </div>
+        
+        <div class="flex space-x-4">
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="form-label">Search</label>
+                <input 
+                    type="text" 
+                    name="search" 
+                    value="{{ search_query }}"
+                    class="form-input" 
+                    placeholder="Search by indicator, project, or user..."
+                >
+            </div>
+            
+            <div>
+                <label class="form-label">Project</label>
+                <select name="project" class="form-select">
+                    <option value="">All Projects</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}" {% if project_filter == project.id|stringformat:"s" %}selected{% endif %}>
+                            {{ project.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="form-label">Indicator</label>
+                <select name="indicator" class="form-select">
+                    <option value="">All Indicators</option>
+                    {% for indicator in indicators %}
+                        <option value="{{ indicator.id }}" {% if indicator_filter == indicator.id|stringformat:"s" %}selected{% endif %}>
+                            {{ indicator.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex items-end">
+                <button type="submit" class="btn-primary w-full">
+                    <i class="fas fa-search mr-2"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Indicator Values Table -->
+    <div class="card">
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Indicator</th>
+                        <th>Project</th>
+                        <th>Reported Value</th>
+                        <th>Target Value</th>
+                        <th>Achievement</th>
+                        <th>Reporting Period</th>
+                        <th>Submitted By</th>
+                        <th>Date Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for value in values %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <div class="font-medium text-undp-text">{{ value.indicator.name }}</div>
+                                    <div class="text-sm text-undp-text-light">{{ value.indicator.code }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="font-medium text-undp-text">{{ value.project.name }}</div>
+                                    <div class="text-sm text-undp-text-light">{{ value.project.code }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="font-semibold text-undp-blue">{{ value.reported_value }}</div>
+                            </td>
+                            <td>
+                                <div class="text-sm text-undp-text">{{ value.target_value|default:"N/A" }}</div>
+                            </td>
+                            <td>
+                                {% if value.achievement_rate %}
+                                    <div class="flex items-center">
+                                        <div class="text-sm font-semibold {% if value.achievement_rate >= 100 %}text-success{% elif value.achievement_rate >= 80 %}text-warning{% else %}text-danger{% endif %}">
+                                            {{ value.achievement_rate|floatformat:1 }}%
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-sm text-undp-text-light">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="text-sm text-undp-text">
+                                    {{ value.reporting_period_start|date:"M d" }} - 
+                                    {{ value.reporting_period_end|date:"M d, Y" }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-sm text-undp-text">
+                                    {{ value.reported_by.get_full_name|default:value.reported_by.username }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-sm text-undp-text">{{ value.created_at|date:"M d, Y" }}</div>
+                                <div class="text-xs text-undp-text-light">{{ value.created_at|time:"H:i" }}</div>
+                            </td>
+                            <td>
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'dashboard:indicator_value_edit' value.id %}" 
+                                       class="text-undp-blue hover:text-undp-blue-dark" 
+                                       title="View Value (Read Only)">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <span class="text-muted" title="Admins cannot delete data">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-8 text-undp-text-light">
+                                <i class="fas fa-database text-4xl mb-4"></i>
+                                <p>No indicator values found matching your criteria.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if values.has_other_pages %}
+            <div class="mt-6 flex justify-center">
+                <nav class="flex space-x-2">
+                    {% if values.has_previous %}
+                        <a href="?page={{ values.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if project_filter %}&project={{ project_filter }}{% endif %}{% if indicator_filter %}&indicator={{ indicator_filter }}{% endif %}" 
+                           class="px-3 py-2 bg-undp-gray-dark text-undp-text rounded-md hover:bg-gray-400">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in values.paginator.page_range %}
+                        {% if num == values.number %}
+                            <span class="px-3 py-2 bg-undp-blue text-white rounded-md">{{ num }}</span>
+                        {% else %}
+                            <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if project_filter %}&project={{ project_filter }}{% endif %}{% if indicator_filter %}&indicator={{ indicator_filter }}{% endif %}" 
+                               class="px-3 py-2 bg-undp-gray-dark text-undp-text rounded-md hover:bg-gray-400">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if values.has_next %}
+                        <a href="?page={{ values.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if project_filter %}&project={{ project_filter }}{% endif %}{% if indicator_filter %}&indicator={{ indicator_filter }}{% endif %}" 
+                           class="px-3 py-2 bg-undp-gray-dark text-undp-text rounded-md hover:bg-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Statistics Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Total Submissions</h3>
+                <i class="fas fa-database dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ values.paginator.count }}</div>
+            <p class="dashboard-card-subtitle">Indicator values</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Targets Achieved</h3>
+                <i class="fas fa-check-circle dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">
+                {% with achieved=0 %}
+                    {% for value in values %}
+                        {% if value.achievement_rate and value.achievement_rate >= 100 %}
+                            {% with achieved=achieved|add:1 %}{% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ achieved }}
+                {% endwith %}
+            </div>
+            <p class="dashboard-card-subtitle">100% or above</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">On Track</h3>
+                <i class="fas fa-chart-line dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">
+                {% with on_track=0 %}
+                    {% for value in values %}
+                        {% if value.achievement_rate and value.achievement_rate >= 80 and value.achievement_rate < 100 %}
+                            {% with on_track=on_track|add:1 %}{% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ on_track }}
+                {% endwith %}
+            </div>
+            <p class="dashboard-card-subtitle">80-99%</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Below Target</h3>
+                <i class="fas fa-exclamation-triangle dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">
+                {% with below_target=0 %}
+                    {% for value in values %}
+                        {% if value.achievement_rate and value.achievement_rate < 80 %}
+                            {% with below_target=below_target|add:1 %}{% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ below_target }}
+                {% endwith %}
+            </div>
+            <p class="dashboard-card-subtitle">Below 80%</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit search form when typing stops
+    const searchInput = document.querySelector('input[name="search"]');
+    let searchTimeout;
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+    }
+    
+    // Auto-submit filter forms when they change
+    const filterSelects = document.querySelectorAll('select[name="project"], select[name="indicator"]');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

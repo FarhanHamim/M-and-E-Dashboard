@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="card bg-gradient-to-r from-undp-blue to-undp-blue-light text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="text-sm opacity-80">Project User</div>
+                <h1 class="text-3xl font-bold">{{ title }}</h1>
+                <p class="opacity-90 mt-1">
+                    {% if indicator %}
+                        Update indicator information
+                    {% else %}
+                        Create a new indicator for data collection
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'dashboard:user_indicator_list' %}" class="btn-secondary bg-white text-undp-blue border-0">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Indicators
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicator Form -->
+    <div class="card">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-undp-text mb-2">
+                        Indicator Name *
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-red-600 text-sm mt-1">
+                            {% for error in form.name.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.code.id_for_label }}" class="block text-sm font-medium text-undp-text mb-2">
+                        Indicator Code *
+                    </label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                        <div class="text-red-600 text-sm mt-1">
+                            {% for error in form.code.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-undp-text mb-2">
+                    Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-red-600 text-sm mt-1">
+                        {% for error in form.description.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="{{ form.indicator_type.id_for_label }}" class="block text-sm font-medium text-undp-text mb-2">
+                        Indicator Type *
+                    </label>
+                    {{ form.indicator_type }}
+                    {% if form.indicator_type.errors %}
+                        <div class="text-red-600 text-sm mt-1">
+                            {% for error in form.indicator_type.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.target_value.id_for_label }}" class="block text-sm font-medium text-undp-text mb-2">
+                        Target Value
+                    </label>
+                    {{ form.target_value }}
+                    {% if form.target_value.errors %}
+                        <div class="text-red-600 text-sm mt-1">
+                            {% for error in form.target_value.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.measurement_unit.id_for_label }}" class="block text-sm font-medium text-undp-text mb-2">
+                        Measurement Unit
+                    </label>
+                    {{ form.measurement_unit }}
+                    {% if form.measurement_unit.errors %}
+                        <div class="text-red-600 text-sm mt-1">
+                            {% for error in form.measurement_unit.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <input type="checkbox" name="is_active" id="id_is_active" class="form-checkbox" 
+                       {% if form.is_active.value %}checked{% endif %}>
+                <label for="id_is_active" class="ml-2 text-sm text-undp-text">
+                    Active (uncheck to deactivate this indicator)
+                </label>
+            </div>
+
+            <div class="flex justify-end space-x-4 pt-6 border-t">
+                <a href="{% url 'dashboard:user_indicator_list' %}" class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if indicator %}Update Indicator{% else %}Create Indicator{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

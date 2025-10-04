@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+            <p class="text-undp-text-light mt-2">Comprehensive system analytics and performance metrics</p>
+        </div>
+        
+        <div class="flex space-x-4">
+            <button onclick="window.print()" class="btn-secondary">
+                <i class="fas fa-print mr-2"></i>Print Report
+            </button>
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Total Users</h3>
+                <i class="fas fa-users dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.users.total }}</div>
+            <p class="dashboard-card-subtitle">
+                {{ stats.users.active }} active users
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Total Projects</h3>
+                <i class="fas fa-project-diagram dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.projects.total }}</div>
+            <p class="dashboard-card-subtitle">
+                {{ stats.projects.active }} active projects
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Total Indicators</h3>
+                <i class="fas fa-chart-bar dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.indicators.total }}</div>
+            <p class="dashboard-card-subtitle">
+                {{ stats.indicators.active }} active indicators
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Data Submissions</h3>
+                <i class="fas fa-database dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.data.total_submissions }}</div>
+            <p class="dashboard-card-subtitle">
+                {{ stats.data.this_month }} this month
+            </p>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- User Statistics -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">User Statistics</h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Total Users:</span>
+                    <span class="font-semibold text-undp-text">{{ stats.users.total }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Active Users:</span>
+                    <span class="font-semibold text-success">{{ stats.users.active }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Administrators:</span>
+                    <span class="font-semibold text-undp-text">{{ stats.users.admins }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Project Users:</span>
+                    <span class="font-semibold text-undp-text">{{ stats.users.project_users }}</span>
+                </div>
+                
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
+                    <div class="bg-success h-2 rounded-full" style="width: {% widthratio stats.users.active stats.users.total 100 %}%"></div>
+                </div>
+                <div class="text-xs text-undp-text-light text-center">
+                    {% widthratio stats.users.active stats.users.total 100 %}% of users are active
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Statistics -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Project Statistics</h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Total Projects:</span>
+                    <span class="font-semibold text-undp-text">{{ stats.projects.total }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Active Projects:</span>
+                    <span class="font-semibold text-success">{{ stats.projects.active }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Completed Projects:</span>
+                    <span class="font-semibold text-info">{{ stats.projects.completed }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Overdue Projects:</span>
+                    <span class="font-semibold {% if stats.projects.overdue > 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ stats.projects.overdue }}
+                    </span>
+                </div>
+                
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
+                    <div class="bg-success h-2 rounded-full" style="width: {% widthratio stats.projects.active stats.projects.total 100 %}%"></div>
+                </div>
+                <div class="text-xs text-undp-text-light text-center">
+                    {% widthratio stats.projects.active stats.projects.total 100 %}% of projects are active
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicator Statistics -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Indicator Statistics</h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Total Indicators:</span>
+                    <span class="font-semibold text-undp-text">{{ stats.indicators.total }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Output Indicators:</span>
+                    <span class="font-semibold text-info">{{ stats.indicators.output }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Outcome Indicators:</span>
+                    <span class="font-semibold text-success">{{ stats.indicators.outcome }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Impact Indicators:</span>
+                    <span class="font-semibold text-warning">{{ stats.indicators.impact }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Statistics -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Data Statistics</h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Total Submissions:</span>
+                    <span class="font-semibold text-undp-text">{{ stats.data.total_submissions }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">This Month:</span>
+                    <span class="font-semibold text-success">{{ stats.data.this_month }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">This Year:</span>
+                    <span class="font-semibold text-info">{{ stats.data.this_year }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-undp-text-light">Average per Month:</span>
+                    <span class="font-semibold text-undp-text">
+                        {% if stats.data.this_year > 0 %}
+                            {% widthratio stats.data.this_year 12 1 %}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Data Submission Trend -->
+        <div class="chart-container">
+            <h3 class="chart-title">Data Submission Trend (Last 12 Months)</h3>
+            <canvas id="submissionTrendChart" height="300"></canvas>
+        </div>
+
+        <!-- Project Status Distribution -->
+        <div class="chart-container">
+            <h3 class="chart-title">Project Status Distribution</h3>
+            <canvas id="projectStatusChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">System Performance</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-success mb-2">99.9%</div>
+                <div class="text-sm text-undp-text-light">System Uptime</div>
+            </div>
+            
+            <div class="text-center">
+                <div class="text-3xl font-bold text-info mb-2">0.2s</div>
+                <div class="text-sm text-undp-text-light">Average Response Time</div>
+            </div>
+            
+            <div class="text-center">
+                <div class="text-3xl font-bold text-warning mb-2">2.1GB</div>
+                <div class="text-sm text-undp-text-light">Database Size</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">System Information</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-medium text-undp-text mb-3">Software Versions</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Application:</span>
+                        <span class="text-undp-text">v1.0.0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Django:</span>
+                        <span class="text-undp-text">5.2.6</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Python:</span>
+                        <span class="text-undp-text">3.11+</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="font-medium text-undp-text mb-3">Database Information</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Type:</span>
+                        <span class="text-undp-text">SQLite</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Size:</span>
+                        <span class="text-undp-text">2.1 GB</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-undp-text-light">Tables:</span>
+                        <span class="text-undp-text">8</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">Export Statistics</h3>
+        
+        <div class="flex flex-wrap gap-4">
+            <button class="btn-secondary">
+                <i class="fas fa-file-csv mr-2"></i>Export as CSV
+            </button>
+            
+            <button class="btn-secondary">
+                <i class="fas fa-file-excel mr-2"></i>Export as Excel
+            </button>
+            
+            <button class="btn-secondary">
+                <i class="fas fa-file-pdf mr-2"></i>Export as PDF
+            </button>
+            
+            <button class="btn-primary">
+                <i class="fas fa-sync mr-2"></i>Refresh Statistics
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sample data for charts (in production, this would come from the backend)
+    const monthlyData = [45, 52, 48, 61, 55, 67, 73, 69, 78, 82, 75, 88];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Data Submission Trend Chart
+    const submissionTrendCtx = document.getElementById('submissionTrendChart');
+    if (submissionTrendCtx) {
+        new Chart(submissionTrendCtx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Submissions',
+                    data: monthlyData,
+                    borderColor: '#0066CC',
+                    backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Project Status Chart
+    const projectStatusCtx = document.getElementById('projectStatusChart');
+    if (projectStatusCtx) {
+        new Chart(projectStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active', 'Completed', 'Suspended', 'Cancelled'],
+                datasets: [{
+                    data: [{{ stats.projects.active }}, {{ stats.projects.completed }}, 0, 0],
+                    backgroundColor: ['#28A745', '#17A2B8', '#FFC107', '#DC3545'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    // Export functionality
+    document.querySelectorAll('button').forEach(button => {
+        if (button.textContent.includes('Export')) {
+            button.addEventListener('click', function() {
+                const format = this.textContent.includes('CSV') ? 'CSV' : 
+                              this.textContent.includes('Excel') ? 'Excel' : 'PDF';
+                
+                // Show loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Exporting...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                    alert(`${format} export completed successfully!`);
+                }, 2000);
+            });
+        }
+    });
+    
+    // Refresh functionality
+    const refreshButton = document.querySelector('button:contains("Refresh")');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', function() {
+            location.reload();
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-undp-text">{{ project.name }}</h1>
+            <p class="text-undp-text-light mt-2">{{ project.code }} • {{ project.cluster.name }}</p>
+        </div>
+        
+        <div class="flex space-x-4">
+            {% if user.profile.is_project_user %}
+                <a href="{% url 'dashboard:data_entry_form' project.id %}" class="btn-primary">
+                    <i class="fas fa-clipboard-list mr-2"></i>Submit Data
+                </a>
+            {% endif %}
+            <a href="{% url 'dashboard:project_list' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Projects
+            </a>
+        </div>
+    </div>
+
+    <!-- Project Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Project Information -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Basic Information -->
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Project Information</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Project Code</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text font-mono">
+                            {{ project.code }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Cluster</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {{ project.cluster.name }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Status</label>
+                        <div class="p-3 bg-undp-gray rounded-md">
+                            <span class="status-{{ project.status }}">{{ project.get_status_display }}</span>
+                            {% if project.is_overdue %}
+                                <span class="status-overdue ml-2">Overdue</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Budget</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {% if project.budget %}
+                                ${{ project.budget|floatformat:0 }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Start Date</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {{ project.start_date|date:"F d, Y" }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">End Date</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {{ project.end_date|date:"F d, Y" }}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if project.description %}
+                    <div class="mt-6">
+                        <label class="form-label">Description</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {{ project.description|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Indicators -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-undp-text">Indicators</h3>
+                    <span class="text-sm text-undp-text-light">{{ indicators.count }} indicators</span>
+                </div>
+                
+                {% if indicators %}
+                    <div class="space-y-4">
+                        {% for indicator in indicators %}
+                            <div class="border border-undp-gray-dark rounded-lg p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-undp-text">{{ indicator.name }}</h4>
+                                        <p class="text-sm text-undp-text-light">{{ indicator.code }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-undp-text-light">Target</div>
+                                        <div class="text-lg font-semibold text-undp-blue">{{ indicator.target_value }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4 text-sm text-undp-text-light mb-3">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-tag mr-1"></i>
+                                        {{ indicator.get_indicator_type_display }}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-chart-bar mr-1"></i>
+                                        {{ indicator.get_measurement_unit_display }}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        {{ indicator.get_frequency_display }}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-end">
+                                    <a href="{% url 'dashboard:indicator_detail' indicator.id %}" 
+                                       class="text-sm text-undp-blue hover:text-undp-blue-dark">
+                                        View Details <i class="fas fa-arrow-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8 text-undp-text-light">
+                        <i class="fas fa-chart-bar text-4xl mb-4"></i>
+                        <p>No indicators assigned to this project yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Project Statistics -->
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Project Statistics</h3>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-undp-text-light">Indicators</span>
+                        <span class="font-semibold text-undp-text">{{ indicators.count }}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-undp-text-light">Team Members</span>
+                        <span class="font-semibold text-undp-text">{{ project.assigned_users.count }}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-undp-text-light">Duration</span>
+                        <span class="font-semibold text-undp-text">
+                            {% with duration=project.end_date|timeuntil:project.start_date %}
+                                {{ duration|truncatechars:20 }}
+                            {% endwith %}
+                        </span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-undp-text-light">Progress</span>
+                        <span class="font-semibold text-undp-text">
+                            {% if project.is_overdue %}
+                                <span class="text-danger">Overdue</span>
+                            {% elif project.status == 'completed' %}
+                                <span class="text-success">Completed</span>
+                            {% else %}
+                                <span class="text-warning">In Progress</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Members -->
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Team Members</h3>
+                
+                {% if project.assigned_users.all %}
+                    <div class="space-y-3">
+                        {% for member in project.assigned_users.all %}
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-undp-blue rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3">
+                                    {{ member.first_name|first|default:member.username|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-undp-text">
+                                        {{ member.get_full_name|default:member.username }}
+                                    </div>
+                                    <div class="text-xs text-undp-text-light">
+                                        {{ member.profile.get_role_display }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-undp-text-light">
+                        <i class="fas fa-users text-2xl mb-2"></i>
+                        <p class="text-sm">No team members assigned</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Recent Activity</h3>
+                
+                {% if recent_values %}
+                    <div class="space-y-3">
+                        {% for value in recent_values|slice:":5" %}
+                            <div class="border-l-4 border-undp-blue pl-3">
+                                <div class="text-sm font-medium text-undp-text">
+                                    {{ value.indicator.name }}
+                                </div>
+                                <div class="text-xs text-undp-text-light">
+                                    {{ value.reported_value }} reported by {{ value.reported_by.get_full_name|default:value.reported_by.username }}
+                                </div>
+                                <div class="text-xs text-undp-text-light">
+                                    {{ value.created_at|date:"M d, Y H:i" }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-undp-text-light">
+                        <i class="fas fa-history text-2xl mb-2"></i>
+                        <p class="text-sm">No recent activity</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Quick Actions</h3>
+                
+                <div class="space-y-2">
+                    {% if user.profile.is_project_user %}
+                        <a href="{% url 'dashboard:data_entry_form' project.id %}" 
+                           class="block w-full text-left px-4 py-2 bg-undp-gray hover:bg-undp-gray-dark rounded transition-colors duration-200">
+                            <i class="fas fa-clipboard-list mr-2"></i>Submit Data
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'dashboard:indicator_list' %}" 
+                       class="block w-full text-left px-4 py-2 bg-undp-gray hover:bg-undp-gray-dark rounded transition-colors duration-200">
+                        <i class="fas fa-chart-bar mr-2"></i>View All Indicators
+                    </a>
+                    
+                    {% if user.profile.is_admin %}
+                        <a href="{% url 'dashboard:project_edit' project.id %}" 
+                           class="block w-full text-left px-4 py-2 bg-undp-gray hover:bg-undp-gray-dark rounded transition-colors duration-200">
+                            <i class="fas fa-edit mr-2"></i>Edit Project
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

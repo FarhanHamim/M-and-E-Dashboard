@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Page Header / Hero -->
+    <div class="card bg-gradient-to-r from-undp-blue to-undp-blue-light text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="text-sm opacity-80">Admin - Data Review</div>
+                <h1 class="text-3xl font-bold">{{ title }}</h1>
+                <p class="opacity-90 mt-1">Review submitted data and generate reports</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'dashboard:submitted_data_list' %}" class="btn-secondary bg-white text-undp-blue border-0"><i class="fas fa-database mr-2"></i>View All Data</a>
+                <a href="{% url 'dashboard:data_analytics' %}" class="btn-secondary bg-white text-undp-blue border-0"><i class="fas fa-chart-line mr-2"></i>Analytics</a>
+                <a href="{% url 'dashboard:reports_home' %}" class="btn-secondary bg-white text-undp-blue border-0"><i class="fas fa-file-export mr-2"></i>Reports</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Statistics Overview -->
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Total Submissions</h3>
+                <i class="fas fa-database dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.total_submissions }}</div>
+            <p class="dashboard-card-subtitle">All time submissions</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">This Month</h3>
+                <i class="fas fa-calendar-alt dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.submissions_this_month }}</div>
+            <p class="dashboard-card-subtitle">Monthly submissions</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">This Year</h3>
+                <i class="fas fa-chart-line dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.submissions_this_year }}</div>
+            <p class="dashboard-card-subtitle">Yearly submissions</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Recent Activity</h3>
+                <i class="fas fa-clock dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ stats.recent_submissions|length }}</div>
+            <p class="dashboard-card-subtitle">Latest submissions</p>
+        </div>
+    </div>
+
+    <!-- Data Review Tools -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Data Review Actions -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Data Review</h3>
+            <div class="grid grid-cols-1 gap-2">
+                <a href="{% url 'dashboard:submitted_data_list' %}" class="flex items-center justify-between px-4 py-3 rounded border hover:bg-undp-gray">
+                    <span><i class="fas fa-database mr-3 text-undp-blue"></i>View All Submissions</span>
+                    <i class="fas fa-chevron-right text-undp-text-light"></i>
+                </a>
+                <a href="{% url 'dashboard:data_analytics' %}" class="flex items-center justify-between px-4 py-3 rounded border hover:bg-undp-gray">
+                    <span><i class="fas fa-chart-line mr-3 text-undp-blue"></i>Data Analytics</span>
+                    <i class="fas fa-chevron-right text-undp-text-light"></i>
+                </a>
+                <a href="{% url 'dashboard:reports_home' %}" class="flex items-center justify-between px-4 py-3 rounded border hover:bg-undp-gray">
+                    <span><i class="fas fa-file-export mr-3 text-undp-blue"></i>Generate Reports</span>
+                    <i class="fas fa-chevron-right text-undp-text-light"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Data Insights -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Data Insights</h3>
+            <div class="space-y-3">
+                <div class="p-3 rounded bg-undp-gray">
+                    <div class="text-undp-text-light text-sm">Total Submissions</div>
+                    <div class="font-semibold text-lg">{{ stats.total_submissions }}</div>
+                </div>
+                <div class="p-3 rounded bg-undp-gray">
+                    <div class="text-undp-text-light text-sm">This Month</div>
+                    <div class="font-semibold text-lg">{{ stats.submissions_this_month }}</div>
+                </div>
+                <div class="p-3 rounded bg-undp-gray">
+                    <div class="text-undp-text-light text-sm">This Year</div>
+                    <div class="font-semibold text-lg">{{ stats.submissions_this_year }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Notice -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Admin Role</h3>
+            <div class="p-4 rounded bg-blue-50 border border-blue-200">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                    <div>
+                        <p class="text-sm text-blue-800 font-medium">Data Review Only</p>
+                        <p class="text-xs text-blue-600 mt-1">
+                            As an admin, you can review submitted data and generate reports. 
+                            You cannot create or modify clusters, projects, or indicators.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Submissions -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">Recent Data Submissions</h3>
+        
+        {% if stats.recent_submissions %}
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Indicator</th>
+                            <th>Project</th>
+                            <th>Value</th>
+                            <th>Submitted By</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in stats.recent_submissions %}
+                            <tr>
+                                <td>
+                                    <div class="font-medium text-undp-text">{{ submission.indicator.name }}</div>
+                                    <div class="text-sm text-undp-text-light">{{ submission.indicator.code }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">{{ submission.project.name }}</div>
+                                </td>
+                                <td>
+                                    <div class="font-semibold text-undp-blue">{{ submission.reported_value }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">
+                                        {{ submission.reported_by.get_full_name|default:submission.reported_by.username }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">{{ submission.created_at|date:"M d, Y" }}</div>
+                                    <div class="text-xs text-undp-text-light">{{ submission.created_at|time:"H:i" }}</div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-8 text-undp-text-light">
+                <i class="fas fa-clipboard-list text-4xl mb-4"></i>
+                <p>No recent submissions found.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

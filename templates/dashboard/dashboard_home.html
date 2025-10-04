@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+            <p class="text-undp-text-light mt-2">
+                {% if is_admin %}
+                    Comprehensive overview of all projects and indicators
+                {% else %}
+                    Overview of your assigned projects and data entry tasks
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="flex space-x-4">
+            {% if is_admin %}
+                <a href="{% url 'admin:index' %}" class="btn-primary">
+                    <i class="fas fa-cog mr-2"></i>Admin Panel
+                </a>
+                <a href="{% url 'dashboard:reports_home' %}" class="btn-secondary">
+                    <i class="fas fa-file-export mr-2"></i>Reports
+                </a>
+            {% else %}
+                <a href="{% url 'dashboard:data_entry_home' %}" class="btn-primary">
+                    <i class="fas fa-clipboard-list mr-2"></i>Data Entry
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Projects</h3>
+                <i class="fas fa-project-diagram dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ total_projects }}</div>
+            <p class="dashboard-card-subtitle">
+                {% if is_admin %}
+                    Total active projects
+                {% else %}
+                    Assigned to you
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Indicators</h3>
+                <i class="fas fa-chart-bar dashboard-card-icon"></i>
+            </div>
+            <div class="dashboard-card-value">{{ total_indicators }}</div>
+            <p class="dashboard-card-subtitle">
+                {% if is_admin %}
+                    Total active indicators
+                {% else %}
+                    In your projects
+                {% endif %}
+            </p>
+        </div>
+
+        {% if is_admin %}
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Submissions</h3>
+                    <i class="fas fa-database dashboard-card-icon"></i>
+                </div>
+                <div class="dashboard-card-value">{{ total_submissions }}</div>
+                <p class="dashboard-card-subtitle">Total submissions</p>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Recent Activity</h3>
+                    <i class="fas fa-clock dashboard-card-icon"></i>
+                </div>
+                <div class="dashboard-card-value">{{ recent_values|length }}</div>
+                <p class="dashboard-card-subtitle">Latest submissions</p>
+            </div>
+        {% else %}
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Submissions</h3>
+                    <i class="fas fa-check-circle dashboard-card-icon"></i>
+                </div>
+                <div class="dashboard-card-value">{{ recent_submissions|length }}</div>
+                <p class="dashboard-card-subtitle">Recent submissions</p>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Status</h3>
+                    <i class="fas fa-info-circle dashboard-card-icon"></i>
+                </div>
+                <div class="dashboard-card-value text-success">Active</div>
+                <p class="dashboard-card-subtitle">Your account status</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% if is_admin %}
+            <!-- Recent Indicator Values -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-semibold text-undp-text">Recent Data Submissions</h3>
+                </div>
+                <div class="space-y-4">
+                    {% for value in recent_values %}
+                        <div class="flex items-center justify-between p-4 bg-undp-gray rounded-lg">
+                            <div>
+                                <h4 class="font-medium text-undp-text">{{ value.indicator.name }}</h4>
+                                <p class="text-sm text-undp-text-light">{{ value.project.name }}</p>
+                                <p class="text-xs text-undp-text-light">
+                                    Reported by {{ value.reported_by.get_full_name|default:value.reported_by.username }}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-semibold text-undp-blue">{{ value.reported_value }}</div>
+                                <div class="text-sm text-undp-text-light">
+                                    {{ value.reporting_period_start|date:"M d, Y" }}
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-8 text-undp-text-light">
+                            <i class="fas fa-chart-bar text-4xl mb-4"></i>
+                            <p>No recent data submissions found.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Data Review Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-semibold text-undp-text">Data Review & Reporting</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <a href="{% url 'dashboard:submitted_data_list' %}" class="block w-full text-left px-4 py-2 bg-undp-gray hover:bg-undp-gray-dark rounded transition-colors duration-200">
+                            <i class="fas fa-database mr-2"></i>View All Submissions
+                        </a>
+                        <a href="{% url 'dashboard:data_analytics' %}" class="block w-full text-left px-4 py-2 bg-undp-gray hover:bg-undp-gray-dark rounded transition-colors duration-200">
+                            <i class="fas fa-chart-line mr-2"></i>Data Analytics
+                        </a>
+                        <a href="{% url 'dashboard:reports_home' %}" class="block w-full text-left px-4 py-2 bg-undp-gray hover:bg-undp-gray-dark rounded transition-colors duration-200">
+                            <i class="fas fa-file-export mr-2"></i>Generate Reports
+                        </a>
+                        <a href="{% url 'dashboard:project_list' %}" class="block w-full text-left px-4 py-2 bg-undp-gray hover:bg-undp-gray-dark rounded transition-colors duration-200">
+                            <i class="fas fa-list mr-2"></i>View Projects
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Project Management -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-semibold text-undp-text">My Management</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <a href="{% url 'dashboard:user_cluster_list' %}" class="flex items-center p-4 bg-undp-gray hover:bg-undp-gray-dark rounded-lg transition-colors">
+                            <i class="fas fa-sitemap text-2xl text-undp-blue mr-4"></i>
+                            <div>
+                                <h4 class="font-medium text-undp-text">My Clusters</h4>
+                                <p class="text-sm text-undp-text-light">Create and manage your clusters</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'dashboard:user_project_list' %}" class="flex items-center p-4 bg-undp-gray hover:bg-undp-gray-dark rounded-lg transition-colors">
+                            <i class="fas fa-project-diagram text-2xl text-undp-blue mr-4"></i>
+                            <div>
+                                <h4 class="font-medium text-undp-text">My Projects</h4>
+                                <p class="text-sm text-undp-text-light">Create and manage your projects</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'dashboard:user_indicator_list' %}" class="flex items-center p-4 bg-undp-gray hover:bg-undp-gray-dark rounded-lg transition-colors">
+                            <i class="fas fa-chart-bar text-2xl text-undp-blue mr-4"></i>
+                            <div>
+                                <h4 class="font-medium text-undp-text">My Indicators</h4>
+                                <p class="text-sm text-undp-text-light">Create and manage your indicators</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Your Assigned Projects -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-semibold text-undp-text">Your Projects</h3>
+                </div>
+                <div class="space-y-4">
+                    {% for project in assigned_projects %}
+                        <div class="flex items-center justify-between p-4 bg-undp-gray rounded-lg">
+                            <div>
+                                <h4 class="font-medium text-undp-text">{{ project.name }}</h4>
+                                <p class="text-sm text-undp-text-light">{{ project.cluster.name }}</p>
+                                <p class="text-xs text-undp-text-light">
+                                    {{ project.start_date|date:"M d, Y" }} - {{ project.end_date|date:"M d, Y" }}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <span class="status-{{ project.status }}">{{ project.get_status_display }}</span>
+                                <div class="mt-2">
+                                    <a href="{% url 'dashboard:project_detail' project.id %}" class="text-sm text-undp-blue hover:text-undp-blue-dark">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-8 text-undp-text-light">
+                            <i class="fas fa-project-diagram text-4xl mb-4"></i>
+                            <p>You haven't created any projects yet.</p>
+                            <a href="{% url 'dashboard:user_project_create' %}" class="btn-primary mt-4">
+                                <i class="fas fa-plus mr-2"></i>Create Project
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Your Recent Submissions - Detailed -->
+    <div class="card">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-undp-text">Your Recent Submissions</h3>
+                    <p class="text-sm text-undp-text-light">{{ recent_submissions|length }} submission{{ recent_submissions|length|pluralize }} with detailed insights</p>
+                </div>
+                <div class="flex items-center space-x-2 text-sm text-undp-text-light">
+                    <i class="fas fa-clock"></i>
+                    <span>Last 30 days</span>
+                </div>
+            </div>
+        </div>
+        <div class="space-y-6">
+            {% if recent_submissions %}
+                {% for submission in recent_submissions %}
+                    <div class="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                        <!-- Header Section -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-undp-blue to-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg">
+                                    <i class="fas fa-chart-bar text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-undp-text mb-1">{{ submission.indicator.name }}</h4>
+                                    <div class="flex items-center space-x-3 text-sm">
+                                        <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-medium">
+                                            <i class="fas fa-code mr-1 text-xs"></i>
+                                            {{ submission.indicator.code }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded-md font-medium">
+                                            <i class="fas fa-project-diagram mr-1 text-xs"></i>
+                                            {{ submission.project.name }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 rounded-md font-medium">
+                                            <i class="fas fa-sitemap mr-1 text-xs"></i>
+                                            {{ submission.project.cluster.name }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-500 mb-1">Submitted</div>
+                                <div class="text-sm font-semibold text-gray-900">{{ submission.created_at|date:"M d, Y" }}</div>
+                                <div class="text-xs text-gray-500">{{ submission.created_at|time:"H:i" }} (BD time)</div>
+                            </div>
+                        </div>
+
+                        <!-- Metrics Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <!-- Reported Value -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-blue-600 mb-1">{{ submission.reported_value }}</div>
+                                <div class="text-sm text-blue-700 font-medium mb-1">Reported Value</div>
+                                <div class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                    {{ submission.indicator.get_measurement_unit_display }}
+                                </div>
+                            </div>
+
+                            <!-- Target Value -->
+                            {% if submission.target_value %}
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                                    <div class="text-2xl font-bold text-gray-700 mb-1">{{ submission.target_value }}</div>
+                                    <div class="text-sm text-gray-600 font-medium mb-1">Target Value</div>
+                                    <div class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                        {{ submission.indicator.get_measurement_unit_display }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                                    <div class="text-2xl font-bold text-gray-400 mb-1">-</div>
+                                    <div class="text-sm text-gray-500 font-medium mb-1">No Target Set</div>
+                                    <div class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Not Available</div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Achievement Rate -->
+                            {% if submission.achievement_rate %}
+                                <div class="rounded-lg p-4 text-center border {% if submission.achievement_rate >= 100 %}bg-green-50 border-green-200{% elif submission.achievement_rate >= 80 %}bg-yellow-50 border-yellow-200{% else %}bg-red-50 border-red-200{% endif %}">
+                                    <div class="text-2xl font-bold mb-1 {% if submission.achievement_rate >= 100 %}text-green-600{% elif submission.achievement_rate >= 80 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                        {{ submission.achievement_rate|floatformat:1 }}%
+                                    </div>
+                                    <div class="text-sm font-medium mb-1 {% if submission.achievement_rate >= 100 %}text-green-700{% elif submission.achievement_rate >= 80 %}text-yellow-700{% else %}text-red-700{% endif %}">
+                                        Achievement Rate
+                                    </div>
+                                    <div class="text-xs px-2 py-1 rounded {% if submission.achievement_rate >= 100 %}text-green-600 bg-green-100{% elif submission.achievement_rate >= 80 %}text-yellow-600 bg-yellow-100{% else %}text-red-600 bg-red-100{% endif %}">
+                                        {% if submission.achievement_rate >= 100 %}Target Achieved{% elif submission.achievement_rate >= 80 %}On Track{% else %}Below Target{% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                                    <div class="text-2xl font-bold text-gray-400 mb-1">-</div>
+                                    <div class="text-sm text-gray-500 font-medium mb-1">No Achievement</div>
+                                    <div class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">No Target Set</div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Status -->
+                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-center">
+                                {% if submission.achievement_rate %}
+                                    {% if submission.achievement_rate >= 100 %}
+                                        <div class="text-lg font-bold text-green-600 mb-1">
+                                            <i class="fas fa-check-circle mr-1"></i>Excellent
+                                        </div>
+                                        <div class="text-sm text-green-700 font-medium mb-1">Target Achieved</div>
+                                    {% elif submission.achievement_rate >= 80 %}
+                                        <div class="text-lg font-bold text-yellow-600 mb-1">
+                                            <i class="fas fa-chart-line mr-1"></i>On Track
+                                        </div>
+                                        <div class="text-sm text-yellow-700 font-medium mb-1">Good Progress</div>
+                                    {% else %}
+                                        <div class="text-lg font-bold text-red-600 mb-1">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>Below Target
+                                        </div>
+                                        <div class="text-sm text-red-700 font-medium mb-1">Needs Attention</div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="text-lg font-bold text-blue-600 mb-1">
+                                        <i class="fas fa-upload mr-1"></i>Submitted
+                                    </div>
+                                    <div class="text-sm text-blue-700 font-medium mb-1">Data Recorded</div>
+                                {% endif %}
+                                <div class="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded">Status</div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                            <!-- Reporting Period -->
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-alt text-gray-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Reporting Period</div>
+                                    <div class="text-sm text-gray-600">
+                                        {{ submission.reporting_period_start|date:"M d, Y" }} - {{ submission.reporting_period_end|date:"M d, Y" }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submitted By -->
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Submitted By</div>
+                                    <div class="text-sm text-gray-600">{{ submission.reported_by.get_full_name|default:submission.reported_by.username }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section (if available) -->
+                        {% if submission.notes %}
+                            <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-start space-x-2">
+                                    <i class="fas fa-sticky-note text-yellow-600 mt-1"></i>
+                                    <div>
+                                        <div class="text-sm font-medium text-yellow-800 mb-1">Notes</div>
+                                        <div class="text-sm text-yellow-700">{{ submission.notes }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- Enhanced Empty State -->
+                <div class="text-center py-16">
+                    <div class="max-w-md mx-auto">
+                        <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-chart-line text-3xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">No Recent Submissions</h3>
+                        <p class="text-gray-600 mb-6">
+                            You haven't submitted any indicator data in the last 30 days. Start by selecting a project and submitting your first data entry.
+                        </p>
+                        <a href="{% url 'dashboard:data_entry_home' %}" class="inline-flex items-center px-6 py-3 bg-undp-blue text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
+                            <i class="fas fa-plus mr-3"></i>
+                            <span class="font-semibold">Start Data Entry</span>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

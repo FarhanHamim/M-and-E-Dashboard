@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="card bg-gradient-to-r from-undp-blue to-undp-blue-light text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="text-sm opacity-80">Admin - Data Analytics</div>
+                <h1 class="text-3xl font-bold">{{ title }}</h1>
+                <p class="opacity-90 mt-1">Analyze submitted data trends and patterns</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'dashboard:admin_dashboard' %}" class="btn-secondary bg-white text-undp-blue border-0"><i class="fas fa-arrow-left mr-2"></i>Back to Dashboard</a>
+                <a href="{% url 'dashboard:submitted_data_list' %}" class="btn-secondary bg-white text-undp-blue border-0"><i class="fas fa-database mr-2"></i>View All Data</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Submissions by Month -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Submissions by Month</h3>
+            {% if analytics.submissions_by_month %}
+                <div class="space-y-3">
+                    {% for item in analytics.submissions_by_month %}
+                        <div class="flex items-center justify-between p-3 bg-undp-gray rounded">
+                            <span class="text-sm font-medium text-undp-text">{{ item.month }}</span>
+                            <span class="text-lg font-bold text-undp-blue">{{ item.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-undp-text-light">
+                    <i class="fas fa-chart-line text-2xl mb-2"></i>
+                    <p>No monthly data available</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Top Projects -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Top Projects by Submissions</h3>
+            {% if analytics.submissions_by_project %}
+                <div class="space-y-3">
+                    {% for item in analytics.submissions_by_project %}
+                        <div class="flex items-center justify-between p-3 bg-undp-gray rounded">
+                            <span class="text-sm font-medium text-undp-text truncate">{{ item.project__name }}</span>
+                            <span class="text-lg font-bold text-undp-blue">{{ item.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-undp-text-light">
+                    <i class="fas fa-project-diagram text-2xl mb-2"></i>
+                    <p>No project data available</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Top Indicators -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Top Indicators by Submissions</h3>
+            {% if analytics.submissions_by_indicator %}
+                <div class="space-y-3">
+                    {% for item in analytics.submissions_by_indicator %}
+                        <div class="flex items-center justify-between p-3 bg-undp-gray rounded">
+                            <span class="text-sm font-medium text-undp-text truncate">{{ item.indicator__name }}</span>
+                            <span class="text-lg font-bold text-undp-blue">{{ item.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-undp-text-light">
+                    <i class="fas fa-chart-bar text-2xl mb-2"></i>
+                    <p>No indicator data available</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">Recent Activity</h3>
+        {% if analytics.recent_activity %}
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Indicator</th>
+                            <th>Project</th>
+                            <th>Value</th>
+                            <th>Submitted By</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in analytics.recent_activity %}
+                            <tr>
+                                <td>
+                                    <div class="font-medium text-undp-text">{{ activity.indicator.name }}</div>
+                                    <div class="text-sm text-undp-text-light">{{ activity.indicator.code }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">{{ activity.project.name }}</div>
+                                </td>
+                                <td>
+                                    <div class="font-semibold text-undp-blue">{{ activity.reported_value }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">
+                                        {{ activity.reported_by.get_full_name|default:activity.reported_by.username }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-sm text-undp-text">{{ activity.created_at|date:"M d, Y" }}</div>
+                                    <div class="text-xs text-undp-text-light">{{ activity.created_at|time:"H:i" }}</div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-8 text-undp-text-light">
+                <i class="fas fa-clock text-4xl mb-4"></i>
+                <p>No recent activity found.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Analytics Tools -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">Analytics Tools</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="{% url 'dashboard:reports_home' %}" class="p-4 border rounded-lg hover:bg-undp-gray transition-colors">
+                <div class="flex items-center">
+                    <i class="fas fa-file-export text-2xl text-undp-blue mr-3"></i>
+                    <div>
+                        <h4 class="font-semibold text-undp-text">Generate Reports</h4>
+                        <p class="text-sm text-undp-text-light">Create detailed reports</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'dashboard:submitted_data_list' %}" class="p-4 border rounded-lg hover:bg-undp-gray transition-colors">
+                <div class="flex items-center">
+                    <i class="fas fa-database text-2xl text-undp-blue mr-3"></i>
+                    <div>
+                        <h4 class="font-semibold text-undp-text">View All Data</h4>
+                        <p class="text-sm text-undp-text-light">Browse all submissions</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="p-4 border rounded-lg hover:bg-undp-gray transition-colors">
+                <div class="flex items-center">
+                    <i class="fas fa-chart-pie text-2xl text-undp-blue mr-3"></i>
+                    <div>
+                        <h4 class="font-semibold text-undp-text">Dashboard Overview</h4>
+                        <p class="text-sm text-undp-text-light">Return to main dashboard</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

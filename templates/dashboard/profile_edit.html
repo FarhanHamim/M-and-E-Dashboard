@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="space-y-6">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+                <p class="text-undp-text-light mt-2">Update your account information</p>
+            </div>
+            
+            <a href="{% url 'dashboard:profile_view' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+            </a>
+        </div>
+
+        <!-- Profile Edit Form -->
+        <div class="card">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Basic Information
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Username</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Email Address</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">First Name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Last Name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-undp-text border-b border-undp-gray-dark pb-2">
+                        Professional Information
+                    </h3>
+                    
+                    <div>
+                        <label class="form-label">Organization</label>
+                        {{ profile_form.organization }}
+                        {% if profile_form.organization.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ profile_form.organization.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Position/Title</label>
+                        {{ profile_form.position }}
+                        {% if profile_form.position.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ profile_form.position.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Phone Number</label>
+                        {{ profile_form.phone_number }}
+                        {% if profile_form.phone_number.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ profile_form.phone_number.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if request.user.profile.is_admin %}
+                        <div>
+                            <label class="form-label">Role</label>
+                            {{ profile_form.role }}
+                            {% if profile_form.role.errors %}
+                                <div class="text-red-500 text-sm mt-1">{{ profile_form.role.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-undp-text-light mt-1">
+                                Only admins can change user roles.
+                            </div>
+                        </div>
+                    {% else %}
+                        <div>
+                            <label class="form-label">Role</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ request.user.profile.get_role_display }}
+                            </div>
+                            <div class="text-xs text-undp-text-light mt-1">
+                                Contact an administrator to change your role.
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-undp-gray-dark">
+                    <a href="{% url 'dashboard:profile_view' %}" class="btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Security Actions -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Security</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-undp-gray rounded-lg">
+                    <div>
+                        <h4 class="font-medium text-undp-text">Password</h4>
+                        <p class="text-sm text-undp-text-light">Change your account password</p>
+                    </div>
+                    <a href="{% url 'dashboard:password_change' %}" class="btn-secondary">
+                        <i class="fas fa-key mr-2"></i>Change Password
+                    </a>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-undp-gray rounded-lg">
+                    <div>
+                        <h4 class="font-medium text-undp-text">Account Security</h4>
+                        <p class="text-sm text-undp-text-light">View login history and security settings</p>
+                    </div>
+                    <a href="{% url 'dashboard:account_security' %}" class="btn-secondary">
+                        <i class="fas fa-shield-alt mr-2"></i>Security Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card bg-blue-50 border-blue-200">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-600 text-xl mr-3 mt-1"></i>
+                <div>
+                    <h4 class="font-semibold text-blue-800 mb-2">Profile Update Guidelines</h4>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• Username must be unique and contain only letters, numbers, and underscores</li>
+                        <li>• Email address will be used for password resets and notifications</li>
+                        <li>• Phone number should include country code for international format</li>
+                        <li>• Organization and position information helps with project assignments</li>
+                        <li>• Role changes require administrator approval</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Username availability check
+    const usernameField = document.querySelector('input[name="username"]');
+    if (usernameField) {
+        let timeout;
+        usernameField.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                checkUsernameAvailability(this.value);
+            }, 500);
+        });
+    }
+    
+    // Email availability check
+    const emailField = document.querySelector('input[name="email"]');
+    if (emailField) {
+        let timeout;
+        emailField.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                checkEmailAvailability(this.value);
+            }, 500);
+        });
+    }
+});
+
+function checkUsernameAvailability(username) {
+    if (username.length < 3) return;
+    
+    fetch(`/dashboard/api/check-username/?username=${encodeURIComponent(username)}`)
+        .then(response => response.json())
+        .then(data => {
+            const usernameField = document.querySelector('input[name="username"]');
+            if (data.available) {
+                usernameField.style.borderColor = '#28A745';
+            } else {
+                usernameField.style.borderColor = '#DC3545';
+            }
+        })
+        .catch(error => console.error('Error checking username:', error));
+}
+
+function checkEmailAvailability(email) {
+    if (email.length < 5) return;
+    
+    fetch(`/dashboard/api/check-email/?email=${encodeURIComponent(email)}`)
+        .then(response => response.json())
+        .then(data => {
+            const emailField = document.querySelector('input[name="email"]');
+            if (data.available) {
+                emailField.style.borderColor = '#28A745';
+            } else {
+                emailField.style.borderColor = '#DC3545';
+            }
+        })
+        .catch(error => console.error('Error checking email:', error));
+}
+</script>
+{% endblock %}

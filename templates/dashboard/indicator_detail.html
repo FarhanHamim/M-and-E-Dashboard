@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-undp-text">{{ indicator.name }}</h1>
+            <p class="text-undp-text-light mt-2">{{ indicator.code }} • {{ indicator.get_indicator_type_display }}</p>
+        </div>
+        
+        <div class="flex space-x-4">
+            {% if user.profile.is_project_user %}
+                {% for project in indicator.projects.all %}
+                    {% if user in project.assigned_users.all %}
+                        <a href="{% url 'dashboard:data_entry_form' project.id %}" class="btn-primary">
+                            <i class="fas fa-clipboard-list mr-2"></i>Submit Data
+                        </a>
+                    {% endif %}
+                {% empty %}
+                    <span class="text-muted">No project access</span>
+                {% endfor %}
+            {% else %}
+                <span class="btn-secondary" title="Only project users can submit data">
+                    <i class="fas fa-eye mr-2"></i>View Only
+                </span>
+            {% endif %}
+            <a href="{% url 'dashboard:indicator_list' %}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Indicators
+            </a>
+        </div>
+    </div>
+
+    <!-- Indicator Overview -->
+    <div class="space-y-6">
+        <!-- Main Content -->
+        <div class="space-y-6">
+            <!-- Basic Information -->
+            <div class="card">
+                <h3 class="text-lg font-semibold text-undp-text mb-4">Indicator Information</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Indicator Code</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text font-mono">
+                            {{ indicator.code }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Type</label>
+                        <div class="p-3 bg-undp-gray rounded-md">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if indicator.indicator_type == 'output' %}bg-blue-100 text-blue-800
+                                {% elif indicator.indicator_type == 'outcome' %}bg-green-100 text-green-800
+                                {% elif indicator.indicator_type == 'impact' %}bg-purple-100 text-purple-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ indicator.get_indicator_type_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Measurement Unit</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {{ indicator.get_measurement_unit_display }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Target Value</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            <span class="text-lg font-semibold text-undp-blue">{{ indicator.target_value }}</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Reporting Frequency</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {{ indicator.get_frequency_display }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Responsible User</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {% if indicator.responsible_user %}
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 bg-undp-blue rounded-full flex items-center justify-center text-white text-xs font-semibold mr-2">
+                                        {{ indicator.responsible_user.first_name|first|default:indicator.responsible_user.username|first|upper }}
+                                    </div>
+                                    {{ indicator.responsible_user.get_full_name|default:indicator.responsible_user.username }}
+                                </div>
+                            {% else %}
+                                Not assigned
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if indicator.description %}
+                    <div class="mt-6">
+                        <label class="form-label">Description</label>
+                        <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                            {{ indicator.description|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Associated Projects -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-undp-text">Associated Projects</h3>
+                    <span class="text-sm text-undp-text-light">{{ indicator.projects.count }} projects</span>
+                </div>
+                
+                {% if indicator.projects.all %}
+                    <div class="space-y-3">
+                        {% for project in indicator.projects.all %}
+                            <div class="border border-undp-gray-dark rounded-lg p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-undp-text">{{ project.name }}</h4>
+                                        <p class="text-sm text-undp-text-light">{{ project.code }} • {{ project.cluster.name }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="status-{{ project.status }}">{{ project.get_status_display }}</span>
+                                        <div class="mt-2">
+                                            <a href="{% url 'dashboard:project_detail' project.id %}" 
+                                               class="text-sm text-undp-blue hover:text-undp-blue-dark">
+                                                View Project
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8 text-undp-text-light">
+                        <i class="fas fa-project-diagram text-4xl mb-4"></i>
+                        <p>No projects associated with this indicator.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Submitted Data -->
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">{{ values.count }} submission{{ values.count|pluralize }} for this indicator</h3>
+                </div>
+                
+                {% if values %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-8 py-6 text-left text-sm font-bold text-gray-800 uppercase tracking-wider">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-project-diagram text-gray-600"></i>
+                                            <span>PROJECT & DETAILS</span>
+                                        </div>
+                                    </th>
+                                    <th class="px-8 py-6 text-left text-sm font-bold text-gray-800 uppercase tracking-wider">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-bullseye text-gray-600"></i>
+                                            <span>VALUES & ACHIEVEMENT</span>
+                                        </div>
+                                    </th>
+                                    <th class="px-8 py-6 text-left text-sm font-bold text-gray-800 uppercase tracking-wider">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-user text-gray-600"></i>
+                                            <span>SUBMITTED BY</span>
+                                        </div>
+                                    </th>
+                                    <th class="px-8 py-6 text-left text-sm font-bold text-gray-800 uppercase tracking-wider">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-calendar-alt text-gray-600"></i>
+                                            <span>PERIOD & DATE</span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for value in values %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-8 py-8">
+                                            <div class="flex items-start space-x-4">
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-tint text-blue-600 text-lg"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="text-lg font-bold text-gray-900 mb-2">{{ value.project.name }}</h4>
+                                                    <p class="text-sm text-gray-600 font-mono mb-3">{{ value.project.code }}</p>
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-blue-100 text-blue-800">
+                                                        <i class="fas fa-layer-group mr-2"></i>
+                                                        {{ value.project.cluster.name }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-8">
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-center space-x-8">
+                                                    <div class="text-center">
+                                                        <div class="text-2xl font-bold text-blue-600 mb-1">{{ value.reported_value }}</div>
+                                                        <div class="text-sm text-gray-500">Reported</div>
+                                                    </div>
+                                                    {% if value.target_value %}
+                                                        <div class="text-center">
+                                                            <div class="text-2xl font-bold text-gray-700 mb-1">{{ value.target_value }}</div>
+                                                            <div class="text-sm text-gray-500">Target</div>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                {% if value.achievement_rate %}
+                                                    <div class="text-center">
+                                                        <div class="text-xl font-bold {% if value.achievement_rate >= 100 %}text-green-600{% elif value.achievement_rate >= 80 %}text-yellow-500{% else %}text-red-600{% endif %} mb-1">
+                                                            {{ value.achievement_rate|floatformat:1 }}%
+                                                        </div>
+                                                        <div class="text-sm text-gray-500">Achievement</div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-8">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <span class="text-gray-600 text-sm font-semibold">
+                                                        {{ value.reported_by.first_name|first|default:value.reported_by.username|first|upper }}
+                                                    </span>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="text-base font-semibold text-gray-900">{{ value.reported_by.get_full_name|default:value.reported_by.username }}</div>
+                                                    <div class="text-sm text-gray-600">{{ value.reported_by.email }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-8">
+                                            <div class="space-y-3">
+                                                <div class="text-base font-semibold text-gray-900">
+                                                    {{ value.reporting_period_start|date:"M d" }} - {{ value.reporting_period_end|date:"M d, Y" }}
+                                                </div>
+                                                <div class="text-sm text-gray-600">
+                                                    Submitted: {{ value.created_at|date:"M d, Y" }} {{ value.created_at|time:"H:i" }}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center space-y-4">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-chart-line text-2xl text-gray-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">No data submitted yet</h3>
+                                <p class="text-gray-500">No data has been submitted for this indicator yet.</p>
+                            </div>
+                            {% if user.profile.is_project_user %}
+                                <a href="{% url 'dashboard:data_entry_home' %}" class="inline-flex items-center px-4 py-2 bg-undp-blue text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                                    <i class="fas fa-clipboard-list mr-2"></i>
+                                    Submit Data
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

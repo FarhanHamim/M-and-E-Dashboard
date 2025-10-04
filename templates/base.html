@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}M&E Dashboard{% endblock %}</title>
+    
+    <!-- Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+    
+    <!-- Tailwind is precompiled; theme in tailwind.config.js -->
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-undp-gray min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-undp-blue shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-chart-line text-white text-2xl mr-3"></i>
+                        <h1 class="text-white text-xl font-bold">M&E Dashboard</h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <div class="relative group">
+                            <button class="text-white hover:text-undp-blue-lightest transition-colors duration-200 flex items-center">
+                                <i class="fas fa-user-circle text-xl mr-2"></i>
+                                <span>{{ user.get_full_name|default:user.username }}</span>
+                                <i class="fas fa-chevron-down ml-2 text-sm"></i>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div class="py-1">
+                                    <a href="{% url 'dashboard:profile_view' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                        <i class="fas fa-user mr-2"></i>My Profile
+                                    </a>
+                                    <a href="{% url 'dashboard:dashboard_home' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                                    </a>
+                                        {% if user.profile.is_admin %}
+                                            <a href="{% url 'dashboard:admin_dashboard' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                                <i class="fas fa-cogs mr-2"></i>Admin Panel
+                                            </a>
+                                            <a href="{% url 'dashboard:submitted_data_list' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                                <i class="fas fa-database mr-2"></i>View Data
+                                            </a>
+                                            <a href="{% url 'dashboard:data_analytics' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                                <i class="fas fa-chart-line mr-2"></i>Analytics
+                                            </a>
+                                            <a href="{% url 'dashboard:reports_home' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                                <i class="fas fa-file-export mr-2"></i>Reports
+                                            </a>
+                                        {% endif %}
+                                    {% if user.profile.is_project_user %}
+                                        <a href="{% url 'dashboard:data_entry_home' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                            <i class="fas fa-clipboard-list mr-2"></i>Data Entry
+                                        </a>
+                                        <a href="{% url 'dashboard:user_cluster_list' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                            <i class="fas fa-sitemap mr-2"></i>Manage Clusters
+                                        </a>
+                                        <a href="{% url 'dashboard:user_project_list' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                            <i class="fas fa-project-diagram mr-2"></i>Manage Projects
+                                        </a>
+                                        <a href="{% url 'dashboard:user_indicator_list' %}" class="block px-4 py-2 text-sm text-undp-text hover:bg-undp-gray">
+                                            <i class="fas fa-chart-bar mr-2"></i>Manage Indicators
+                                        </a>
+                                    {% endif %}
+                                    <hr class="my-1">
+                                    <a href="{% url 'dashboard:logout' %}" class="block px-4 py-2 text-sm text-danger hover:bg-undp-gray">
+                                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-white hover:text-undp-blue-lightest transition-colors duration-200">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Messages -->
+        {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} bg-{{ message.tags }} border-l-4 border-{{ message.tags }}-500 text-white p-4 mb-2 rounded">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                {% if message.tags == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% elif message.tags == 'warning' %}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium">{{ message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-undp-gray-dark mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div class="text-undp-text-light text-sm">
+                    © 2025 M&E Dashboard. Built for monitoring and evaluation.
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-undp-text-light hover:text-undp-blue transition-colors duration-200">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="text-undp-text-light hover:text-undp-blue transition-colors duration-200">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

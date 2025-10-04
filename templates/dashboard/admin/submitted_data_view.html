@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="card bg-gradient-to-r from-undp-blue to-undp-blue-light text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="text-sm opacity-80">Admin - Data Review</div>
+                <h1 class="text-3xl font-bold">{{ title }}</h1>
+                <p class="opacity-90 mt-1">View detailed submission information</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'dashboard:submitted_data_list' %}" class="btn-secondary bg-white text-undp-blue border-0"><i class="fas fa-arrow-left mr-2"></i>Back to List</a>
+                <a href="{% url 'dashboard:admin_dashboard' %}" class="btn-secondary bg-white text-undp-blue border-0"><i class="fas fa-home mr-2"></i>Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Details -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Basic Information -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Submission Details</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-undp-text-light">Indicator</label>
+                    <div class="text-lg font-semibold text-undp-text">{{ value.indicator.name }}</div>
+                    <div class="text-sm text-undp-text-light">{{ value.indicator.code }}</div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-undp-text-light">Project</label>
+                    <div class="text-lg font-semibold text-undp-text">{{ value.project.name }}</div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-undp-text-light">Reported Value</label>
+                    <div class="text-2xl font-bold text-undp-blue">{{ value.reported_value }}</div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-undp-text-light">Target Value</label>
+                    <div class="text-lg font-semibold text-undp-text">
+                        {% if value.target_value %}{{ value.target_value }}{% else %}Not specified{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporting Information -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Reporting Information</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-undp-text-light">Submitted By</label>
+                    <div class="text-lg font-semibold text-undp-text">
+                        {{ value.reported_by.get_full_name|default:value.reported_by.username }}
+                    </div>
+                    <div class="text-sm text-undp-text-light">{{ value.reported_by.email }}</div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-undp-text-light">Reporting Period</label>
+                    <div class="text-lg font-semibold text-undp-text">
+                        {{ value.reporting_period_start|date:"F d, Y" }} - {{ value.reporting_period_end|date:"F d, Y" }}
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-undp-text-light">Submitted On</label>
+                    <div class="text-lg font-semibold text-undp-text">
+                        {{ value.created_at|date:"F d, Y" }}
+                    </div>
+                    <div class="text-sm text-undp-text-light">{{ value.created_at|time:"H:i:s" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">Additional Information</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-undp-text-light mb-2">Indicator Description</label>
+                <div class="p-4 bg-undp-gray rounded-lg">
+                    <p class="text-undp-text">{{ value.indicator.description|default:"No description available" }}</p>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-undp-text-light mb-2">Indicator Type</label>
+                <div class="p-4 bg-undp-gray rounded-lg">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if value.indicator.indicator_type == 'quantitative' %}bg-green-100 text-green-800
+                        {% elif value.indicator.indicator_type == 'qualitative' %}bg-blue-100 text-blue-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ value.indicator.get_indicator_type_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        {% if value.notes %}
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-undp-text-light mb-2">Notes</label>
+                <div class="p-4 bg-undp-gray rounded-lg">
+                    <p class="text-undp-text">{{ value.notes }}</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Admin Notice -->
+    <div class="card">
+        <div class="p-4 rounded bg-blue-50 border border-blue-200">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                <div>
+                    <p class="text-sm text-blue-800 font-medium">Read-Only View</p>
+                    <p class="text-xs text-blue-600 mt-1">
+                        This is a read-only view of the submitted data. As an admin, you can review the information 
+                        but cannot modify it. Only project users can edit their submitted data.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-semibold mb-4">Reports</h1>
+
+    <div class="bg-white shadow rounded p-4 mb-6">
+        <form id="report-filters" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Project</label>
+                <select name="project_id" id="filter-project" class="w-full border rounded px-3 py-2">
+                    <option value="">All projects</option>
+                    {% for project in projects %}
+                    <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Indicator</label>
+                <select name="indicator_id" id="filter-indicator" class="w-full border rounded px-3 py-2">
+                    <option value="">All indicators</option>
+                    {% for indicator in indicators %}
+                    <option value="{{ indicator.id }}">{{ indicator.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Start date</label>
+                <input type="date" name="start_date" id="filter-start" class="w-full border rounded px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">End date</label>
+                <input type="date" name="end_date" id="filter-end" class="w-full border rounded px-3 py-2" />
+            </div>
+            <div class="md:col-span-4 flex gap-2">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded" id="btn-generate">Generate</button>
+                <a id="export-csv" href="#" class="bg-gray-100 text-blue-700 px-4 py-2 rounded border">Export CSV</a>
+                <a id="export-pdf" href="#" class="bg-gray-100 text-blue-700 px-4 py-2 rounded border">Export PDF</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white shadow rounded">
+        <div id="report-results" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Indicator</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported Value</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target Value</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported By</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                    </tr>
+                </thead>
+                <tbody id="report-tbody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="7" class="px-4 py-6 text-center text-gray-500">No data. Use filters and click Generate.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('report-filters');
+    const tbody = document.getElementById('report-tbody');
+    const exportCsv = document.getElementById('export-csv');
+    const exportPdf = document.getElementById('export-pdf');
+
+    function buildQuery() {
+        const data = new FormData(form);
+        const params = new URLSearchParams();
+        for (const [k,v] of data.entries()) {
+            if (v) params.append(k, v);
+        }
+        return params.toString();
+    }
+
+    function updateExportLinks() {
+        const query = buildQuery();
+        exportCsv.href = `{% url 'dashboard:export_report' 'csv' %}?` + query;
+        exportPdf.href = `{% url 'dashboard:export_report' 'pdf' %}?` + query;
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = buildQuery();
+        updateExportLinks();
+        const resp = await fetch(`{% url 'dashboard:generate_report' %}?` + query, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await resp.json();
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        tbody.innerHTML = data.html || '<tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">No records found.</td></tr>';
+    });
+
+    updateExportLinks();
+});
+</script>
+{% endblock %}
+
+

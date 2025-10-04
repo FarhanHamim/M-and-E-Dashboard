@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+            <p class="text-undp-text-light mt-2">Configure system-wide settings and preferences</p>
+        </div>
+        
+        <a href="{% url 'dashboard:admin_dashboard' %}" class="btn-secondary">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Admin Dashboard
+        </a>
+    </div>
+
+    <!-- Settings Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- General Settings -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">General Settings</h3>
+            
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="form-label">System Name</label>
+                    <input type="text" class="form-input" value="M&E Dashboard" readonly>
+                    <div class="text-xs text-undp-text-light mt-1">
+                        System name displayed in the header
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Default Reporting Period</label>
+                    <select class="form-select">
+                        <option>Monthly</option>
+                        <option selected>Quarterly</option>
+                        <option>Annually</option>
+                    </select>
+                    <div class="text-xs text-undp-text-light mt-1">
+                        Default frequency for new indicators
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Data Retention Period</label>
+                    <select class="form-select">
+                        <option>1 Year</option>
+                        <option selected>3 Years</option>
+                        <option>5 Years</option>
+                        <option>Indefinite</option>
+                    </select>
+                    <div class="text-xs text-undp-text-light mt-1">
+                        How long to keep submitted data
+                    </div>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" class="form-checkbox" checked>
+                    <label class="ml-2 text-sm text-undp-text">
+                        Enable email notifications
+                    </label>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" class="form-checkbox" checked>
+                    <label class="ml-2 text-sm text-undp-text">
+                        Require data approval
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-primary w-full">
+                    <i class="fas fa-save mr-2"></i>Save General Settings
+                </button>
+            </form>
+        </div>
+
+        <!-- User Management Settings -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">User Management</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label">Default User Role</label>
+                    <select class="form-select">
+                        <option>Project User</option>
+                        <option>Administrator</option>
+                    </select>
+                    <div class="text-xs text-undp-text-light mt-1">
+                        Default role for new user registrations
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Password Requirements</label>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <input type="checkbox" class="form-checkbox" checked>
+                            <label class="ml-2 text-undp-text">Minimum 8 characters</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" class="form-checkbox" checked>
+                            <label class="ml-2 text-undp-text">Require uppercase letter</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" class="form-checkbox" checked>
+                            <label class="ml-2 text-undp-text">Require lowercase letter</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" class="form-checkbox">
+                            <label class="ml-2 text-undp-text">Require special character</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Session Timeout</label>
+                    <select class="form-select">
+                        <option>30 minutes</option>
+                        <option selected>1 hour</option>
+                        <option>2 hours</option>
+                        <option>4 hours</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" class="form-checkbox" checked>
+                    <label class="ml-2 text-sm text-undp-text">
+                        Allow user self-registration
+                    </label>
+                </div>
+                
+                <button type="button" class="btn-secondary w-full">
+                    <i class="fas fa-users mr-2"></i>Save User Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">Data Management</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label">Auto-backup Frequency</label>
+                    <select class="form-select">
+                        <option>Daily</option>
+                        <option selected>Weekly</option>
+                        <option>Monthly</option>
+                        <option>Manual only</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label">Data Export Format</label>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <input type="checkbox" class="form-checkbox" checked>
+                            <label class="ml-2 text-undp-text">CSV</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" class="form-checkbox" checked>
+                            <label class="ml-2 text-undp-text">Excel</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" class="form-checkbox">
+                            <label class="ml-2 text-undp-text">PDF</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" class="form-checkbox" checked>
+                    <label class="ml-2 text-sm text-undp-text">
+                        Enable data validation
+                    </label>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" class="form-checkbox">
+                    <label class="ml-2 text-sm text-undp-text">
+                        Allow data editing after submission
+                    </label>
+                </div>
+                
+                <button type="button" class="btn-primary w-full">
+                    <i class="fas fa-database mr-2"></i>Save Data Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- System Maintenance -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-undp-text mb-4">System Maintenance</h3>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 bg-undp-gray rounded-lg">
+                    <div>
+                        <div class="font-medium text-undp-text">Database Backup</div>
+                        <div class="text-sm text-undp-text-light">Last backup: Never</div>
+                    </div>
+                    <a href="{% url 'dashboard:backup_data' %}" class="btn-secondary">
+                        <i class="fas fa-download mr-2"></i>Backup Now
+                    </a>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-undp-gray rounded-lg">
+                    <div>
+                        <div class="font-medium text-undp-text">Cache Clear</div>
+                        <div class="text-sm text-undp-text-light">Clear system cache</div>
+                    </div>
+                    <button type="button" class="btn-secondary">
+                        <i class="fas fa-broom mr-2"></i>Clear Cache
+                    </button>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-undp-gray rounded-lg">
+                    <div>
+                        <div class="font-medium text-undp-text">System Statistics</div>
+                        <div class="text-sm text-undp-text-light">View detailed system stats</div>
+                    </div>
+                    <a href="{% url 'dashboard:system_statistics' %}" class="btn-secondary">
+                        <i class="fas fa-chart-bar mr-2"></i>View Stats
+                    </a>
+                </div>
+                
+                <div class="border-t border-undp-gray-dark pt-4">
+                    <div class="text-sm text-undp-text-light mb-2">System Information</div>
+                    <div class="space-y-1 text-xs text-undp-text-light">
+                        <div>Version: 1.0.0</div>
+                        <div>Django: 5.2.6</div>
+                        <div>Python: 3.11+</div>
+                        <div>Database: SQLite</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="card">
+        <h3 class="text-lg font-semibold text-undp-text mb-4">Security Settings</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="form-label">Login Attempts Limit</label>
+                <select class="form-select">
+                    <option>3 attempts</option>
+                    <option selected>5 attempts</option>
+                    <option>10 attempts</option>
+                </select>
+                <div class="text-xs text-undp-text-light mt-1">
+                    Number of failed login attempts before account lockout
+                </div>
+            </div>
+            
+            <div>
+                <label class="form-label">Account Lockout Duration</label>
+                <select class="form-select">
+                    <option>15 minutes</option>
+                    <option selected>30 minutes</option>
+                    <option>1 hour</option>
+                    <option>24 hours</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="flex items-center">
+                <input type="checkbox" class="form-checkbox" checked>
+                <label class="ml-2 text-sm text-undp-text">
+                    Enable two-factor authentication
+                </label>
+            </div>
+            <div class="text-xs text-undp-text-light mt-1">
+                Require additional verification for admin accounts
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="flex items-center">
+                <input type="checkbox" class="form-checkbox">
+                <label class="ml-2 text-sm text-undp-text">
+                    Log all user activities
+                </label>
+            </div>
+            <div class="text-xs text-undp-text-light mt-1">
+                Track user actions for security auditing
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <button type="button" class="btn-primary">
+                <i class="fas fa-shield-alt mr-2"></i>Save Security Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="card bg-blue-50 border-blue-200">
+        <div class="flex items-start">
+            <i class="fas fa-info-circle text-blue-600 text-xl mr-3 mt-1"></i>
+            <div>
+                <h4 class="font-semibold text-blue-800 mb-2">Settings Guidelines</h4>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Changes to settings take effect immediately</li>
+                    <li>• Regular backups are recommended for data safety</li>
+                    <li>• Security settings should be reviewed periodically</li>
+                    <li>• User management settings affect new registrations only</li>
+                    <li>• Contact system administrator for advanced configuration</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add confirmation for sensitive actions
+    const backupButton = document.querySelector('a[href*="backup"]');
+    if (backupButton) {
+        backupButton.addEventListener('click', function(e) {
+            if (!confirm('This will create a backup of all system data. Continue?')) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    const cacheButton = document.querySelector('button:contains("Clear Cache")');
+    if (cacheButton) {
+        cacheButton.addEventListener('click', function(e) {
+            if (!confirm('This will clear the system cache. Continue?')) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    // Form validation for settings
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show success message
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'p-3 bg-green-100 text-green-800 rounded-md mt-4';
+                successDiv.innerHTML = '<i class="fas fa-check mr-2"></i>Settings saved successfully!';
+                form.appendChild(successDiv);
+                
+                setTimeout(() => {
+                    successDiv.remove();
+                }, 3000);
+            }, 1000);
+        });
+    });
+});
+</script>
+{% endblock %}

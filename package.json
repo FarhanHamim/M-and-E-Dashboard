@@ -1,0 +1,20 @@
+{
+  "name": "me-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.13"
+  },
+  "scripts": {
+    "build:css": "node ./scripts/build-css.mjs",
+    "watch:css": "chokidar \"static/src/**/*.css\" -c \"node ./scripts/build-css.mjs\"",
+    "dev": "concurrently \"npm:watch:css\""
+  },
+  "dependencies": {
+    "chokidar-cli": "^3.0.0"
+  }
+}

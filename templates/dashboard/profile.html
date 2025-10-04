@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="space-y-6">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-undp-text">{{ title }}</h1>
+                <p class="text-undp-text-light mt-2">Manage your account information</p>
+            </div>
+            
+            <div class="flex space-x-4">
+                <a href="{% url 'dashboard:profile_edit' %}" class="btn-primary">
+                    <i class="fas fa-edit mr-2"></i>Edit Profile
+                </a>
+                <a href="{% url 'dashboard:password_change' %}" class="btn-secondary">
+                    <i class="fas fa-key mr-2"></i>Change Password
+                </a>
+            </div>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="card">
+                    <div class="text-center">
+                        <div class="w-24 h-24 bg-undp-blue rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+                            {{ user.first_name|first|default:user.username|first|upper }}
+                        </div>
+                        
+                        <h2 class="text-xl font-semibold text-undp-text mb-2">
+                            {{ user.get_full_name|default:user.username }}
+                        </h2>
+                        
+                        <p class="text-undp-text-light mb-4">
+                            @{{ user.username }}
+                        </p>
+                        
+                        <div class="space-y-2">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                {% if user.profile.is_admin %}bg-blue-100 text-blue-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                <i class="fas {% if user.profile.is_admin %}fa-crown{% else %}fa-user{% endif %} mr-2"></i>
+                                {{ user.profile.get_role_display }}
+                            </span>
+                            
+                            {% if user.is_active %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-2"></i>Active
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    <i class="fas fa-times-circle mr-2"></i>Inactive
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                {% if user.profile.is_project_user %}
+                    <div class="card mt-6">
+                        <h3 class="text-lg font-semibold text-undp-text mb-4">Quick Stats</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-undp-text-light">Assigned Projects</span>
+                                <span class="font-semibold text-undp-text">{{ user.assigned_projects.count }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-undp-text-light">Recent Submissions</span>
+                                <span class="font-semibold text-undp-text">{{ user.reported_values.count }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-undp-text-light">Member Since</span>
+                                <span class="font-semibold text-undp-text">{{ user.date_joined|date:"M Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Detailed Information -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Personal Information -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold text-undp-text mb-4">Personal Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">First Name</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.first_name|default:"Not specified" }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Last Name</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.last_name|default:"Not specified" }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Username</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.username }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Email Address</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.email|default:"Not specified" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold text-undp-text mb-4">Professional Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Organization</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.profile.organization|default:"Not specified" }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Position</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.profile.position|default:"Not specified" }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Phone Number</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.profile.phone_number|default:"Not specified" }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Role</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.profile.get_role_display }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Information -->
+                <div class="card">
+                    <h3 class="text-lg font-semibold text-undp-text mb-4">Account Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Account Created</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.date_joined|date:"F d, Y" }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Last Login</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {{ user.last_login|date:"F d, Y H:i"|default:"Never" }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Account Status</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {% if user.is_active %}
+                                    <span class="text-success">Active</span>
+                                {% else %}
+                                    <span class="text-danger">Inactive</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Staff Status</label>
+                            <div class="p-3 bg-undp-gray rounded-md text-undp-text">
+                                {% if user.is_staff %}
+                                    <span class="text-success">Yes</span>
+                                {% else %}
+                                    <span class="text-undp-text-light">No</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assigned Projects (for project users) -->
+                {% if user.profile.is_project_user and user.assigned_projects.exists %}
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-undp-text mb-4">Assigned Projects</h3>
+                        <div class="space-y-3">
+                            {% for project in user.assigned_projects.all %}
+                                <div class="flex items-center justify-between p-4 bg-undp-gray rounded-lg">
+                                    <div>
+                                        <h4 class="font-medium text-undp-text">{{ project.name }}</h4>
+                                        <p class="text-sm text-undp-text-light">{{ project.cluster.name }}</p>
+                                        <p class="text-xs text-undp-text-light">
+                                            {{ project.start_date|date:"M d, Y" }} - {{ project.end_date|date:"M d, Y" }}
+                                        </p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="status-{{ project.status }}">{{ project.get_status_display }}</span>
+                                        <div class="mt-2">
+                                            <a href="{% url 'dashboard:project_detail' project.id %}" 
+                                               class="text-sm text-undp-blue hover:text-undp-blue-dark">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

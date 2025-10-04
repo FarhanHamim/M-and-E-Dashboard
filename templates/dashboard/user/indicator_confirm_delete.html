@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="card bg-gradient-to-r from-red-600 to-red-700 text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="text-sm opacity-80">Project User</div>
+                <h1 class="text-3xl font-bold">{{ title }}</h1>
+                <p class="opacity-90 mt-1">Confirm deletion of indicator</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'dashboard:user_indicator_list' %}" class="btn-secondary bg-white text-red-600 border-0">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Indicators
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation -->
+    <div class="card">
+        <div class="text-center py-8">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+            
+            <h3 class="text-lg font-medium text-undp-text mb-2">Are you sure you want to delete this indicator?</h3>
+            
+            <div class="bg-gray-50 rounded-lg p-6 mt-6 max-w-md mx-auto">
+                <h4 class="font-semibold text-undp-text mb-2">{{ indicator.name }}</h4>
+                <p class="text-sm text-undp-text-light mb-2">Code: {{ indicator.code }}</p>
+                <p class="text-sm text-undp-text-light mb-2">
+                    Type: {{ indicator.get_indicator_type_display }}
+                </p>
+                {% if indicator.target_value %}
+                    <p class="text-sm text-undp-text-light mb-2">
+                        Target: {{ indicator.target_value }} {{ indicator.get_measurement_unit_display }}
+                    </p>
+                {% endif %}
+                {% if indicator.description %}
+                    <p class="text-sm text-undp-text-light mt-2">{{ indicator.description|truncatechars:100 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="mt-6">
+                <p class="text-sm text-red-600 mb-4">
+                    <strong>Warning:</strong> This action cannot be undone. All data collected for this indicator will also be deleted.
+                </p>
+            </div>
+
+            <form method="post" class="flex justify-center space-x-4">
+                {% csrf_token %}
+                <a href="{% url 'dashboard:user_indicator_list' %}" class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash mr-2"></i>Delete Indicator
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

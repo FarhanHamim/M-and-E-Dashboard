@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-undp-gray text-undp-text; }
+}
+
+@layer components {
+  .btn-primary { @apply inline-flex items-center px-4 py-2 rounded bg-undp-blue text-white hover:bg-undp-blue-dark transition; }
+  .btn-secondary { @apply inline-flex items-center px-4 py-2 rounded bg-white text-undp-blue border border-undp-blue hover:bg-undp-blue-light hover:text-white transition; }
+  .card { @apply bg-white rounded shadow p-4; }
+  .card-header { @apply mb-3; }
+  .form-input { @apply w-full border rounded px-3 py-2; }
+  .form-select { @apply w-full border rounded px-3 py-2; }
+  .form-textarea { @apply w-full border rounded px-3 py-2; }
+  .form-label { @apply block text-sm font-medium mb-1; }
+  .chart-container { @apply card; }
+  .chart-title { @apply text-lg font-semibold mb-2; }
+  .dashboard-card { @apply card; }
+  .dashboard-card-header { @apply flex items-center justify-between mb-2; }
+  .dashboard-card-title { @apply text-sm font-medium text-undp-text-light; }
+  .dashboard-card-icon { @apply text-undp-blue; }
+  .dashboard-card-value { @apply text-3xl font-bold text-undp-text; }
+  .dashboard-card-subtitle { @apply text-sm text-undp-text-light; }
+  .status-active { @apply text-success; }
+  .status-completed { @apply text-success; }
+  .status-suspended { @apply text-warning; }
+  .status-cancelled { @apply text-danger; }
+  .alert-success { @apply bg-green-600; }
+  .alert-warning { @apply bg-yellow-500; }
+  .alert-error, .alert-danger { @apply bg-red-600; }
+  .alert-info { @apply bg-blue-600; }
+}
+
+
